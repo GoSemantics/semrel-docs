@@ -3,6 +3,7 @@ import starlight from '@astrojs/starlight';
 
 export default defineConfig({
   site: 'https://semrel.io',
+  output: 'static',
   integrations: [
     starlight({
       title: 'go-semrel',
@@ -12,7 +13,7 @@ export default defineConfig({
       },
       social: {
         github: 'https://github.com/GoSemantics/go-semrel',
-        linkedin: 'https://linkedin.com/in/go-semrel',
+        linkedin: 'https://www.linkedin.com/company/gosemantics',
       },
       sidebar: [
         {
