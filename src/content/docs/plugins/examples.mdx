@@ -1,0 +1,115 @@
+---
+title: Plugin Examples
+description: Ready-to-use and community plugin examples for semrel.
+---
+
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+## Official plugins
+
+Official plugins live in the [GoSemantics/semrel-plugins](https://github.com/GoSemantics/semrel-plugins) repository (currently being set up).
+
+<CardGrid>
+  <Card title="github" icon="github">
+    **ProviderPlugin** for GitHub. Creates releases, uploads assets, and fetches commit history via the GitHub REST API.
+  </Card>
+  <Card title="conventional-commits" icon="magnifier">
+    **CommitAnalyzerPlugin** that follows the [Conventional Commits](https://www.conventionalcommits.org/) specification to determine the version bump.
+  </Card>
+  <Card title="markdown-changelog" icon="document">
+    **ChangelogGeneratorPlugin** that renders release notes as a Markdown `CHANGELOG.md` section.
+  </Card>
+  <Card title="go-mod-updater" icon="pencil">
+    **FilesUpdaterPlugin** that stamps the next version into Go source files via `ldflags`-compatible version variables.
+  </Card>
+</CardGrid>
+
+<Aside type="note">
+  Official plugins are under active development. Watch the [semrel-plugins](https://github.com/GoSemantics/semrel-plugins) repository for releases.
+</Aside>
+
+## Minimal CommitAnalyzer (Go)
+
+A bare-bones commit analyser in fewer than 50 lines:
+
+```go
+package main
+
+import (
+  "context"
+  "fmt"
+  "net"
+  "os"
+  "strings"
+
+  semrelv1 "github.com/GoSemantics/semrel-plugins/gen/v1"
+  "google.golang.org/grpc"
+)
+
+type analyzer struct{ semrelv1.UnimplementedCommitAnalyzerPluginServer }
+
+func (a *analyzer) AnalyzeCommits(
+  _ context.Context, req *semrelv1.AnalyzeCommitsRequest,
+) (*semrelv1.AnalyzeCommitsResponse, error) {
+  bump := semrelv1.BumpLevel_BUMP_LEVEL_NONE
+  for _, c := range req.Ctx.Commits {
+    switch {
+    case strings.Contains(c.RawMessage, "BREAKING CHANGE"):
+      return &semrelv1.AnalyzeCommitsResponse{Bump: semrelv1.BumpLevel_BUMP_LEVEL_MAJOR}, nil
+    case strings.HasPrefix(c.RawMessage, "feat"):
+      bump = semrelv1.BumpLevel_BUMP_LEVEL_MINOR
+    case strings.HasPrefix(c.RawMessage, "fix") && bump == semrelv1.BumpLevel_BUMP_LEVEL_NONE:
+      bump = semrelv1.BumpLevel_BUMP_LEVEL_PATCH
+    }
+  }
+  return &semrelv1.AnalyzeCommitsResponse{Bump: bump}, nil
+}
+
+func main() {
+  lis, _ := net.Listen("tcp", "127.0.0.1:0")
+  fmt.Println(lis.Addr().(*net.TCPAddr).Port)
+  srv := grpc.NewServer()
+  semrelv1.RegisterCommitAnalyzerPluginServer(srv, &analyzer{})
+  if err := srv.Serve(lis); err != nil {
+    fmt.Fprintln(os.Stderr, err); os.Exit(1)
+  }
+}
+```
+
+## Minimal HooksPlugin (Python)
+
+A Slack notification hook in Python, showing that plugins don’t have to be written in Go:
+
+```python
+import os, sys, socket, concurrent.futures
+import grpc
+from semrel_v1 import semantic_release_pb2, semantic_release_pb2_grpc
+
+class SlackHook(semantic_release_pb2_grpc.HooksPluginServicer):
+    def OnSuccess(self, request, context):
+        webhook = request.ctx.config.get("webhook_url", "")
+        if webhook:
+            import urllib.request, json
+            data = json.dumps({"text": f"Released {request.ctx.next_version}!"})
+            urllib.request.urlopen(webhook, data.encode())
+        return semantic_release_pb2.OnSuccessResponse()
+
+    def OnFail(self, request, context):
+        return semantic_release_pb2.OnFailResponse()
+
+if __name__ == "__main__":
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    print(port, flush=True)  # semrel reads this
+    server = grpc.server(concurrent.futures.ThreadPoolExecutor())
+    semantic_release_pb2_grpc.add_HooksPluginServicer_to_server(SlackHook(), server)
+    server.add_insecure_port(f"127.0.0.1:{port}")
+    server.start()
+    server.wait_for_termination()
+```
+
+## Community plugins
+
+Community-contributed plugins will be listed in the [semrel registry](https://registry.semrel.io/) once it launches. To have your plugin listed, open an issue or PR in the main repository.

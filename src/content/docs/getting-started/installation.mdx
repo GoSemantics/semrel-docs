@@ -1,0 +1,84 @@
+---
+title: Installation
+description: How to install semrel on Linux, macOS, and Windows.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## Prerequisites
+
+- **Git** ≥ 2.30
+- A repository that uses [Conventional Commits](https://www.conventionalcommits.org/)
+
+## Install
+
+<Tabs>
+  <TabItem label="go install">
+    ```bash
+    go install github.com/GoSemantics/semrel/cmd/semrel@latest
+    ```
+    Requires Go ≥ 1.22. The binary is placed in `$GOPATH/bin` (usually `~/go/bin`).
+  </TabItem>
+  <TabItem label="Binary download">
+    Download the pre-built binary for your platform from [GitHub Releases](https://github.com/GoSemantics/semrel/releases) and place it somewhere on your `$PATH`:
+
+    ```bash
+    # Linux / macOS (example for v0.1.0, amd64)
+    curl -L https://github.com/GoSemantics/semrel/releases/download/v0.1.0/semrel_linux_amd64 \
+      -o /usr/local/bin/semrel
+    chmod +x /usr/local/bin/semrel
+    ```
+  </TabItem>
+  <TabItem label="From source">
+    ```bash
+    git clone https://github.com/GoSemantics/semrel.git
+    cd semrel
+    go build -o semrel ./cmd/go-semrel
+    mv semrel /usr/local/bin/
+    ```
+  </TabItem>
+</Tabs>
+
+## Verify
+
+```bash
+semrel --version
+```
+
+Expected output:
+```
+semrel version v0.1.0
+```
+
+<Aside type="note">
+  semrel is still in early development. Binary releases may not yet be available for all platforms. Using `go install` is the most reliable installation method right now.
+</Aside>
+
+## CI / CD
+
+For GitHub Actions, add a setup step before calling `semrel release`:
+
+```yaml
+- name: Set up Go
+  uses: actions/setup-go@v5
+  with:
+    go-version: '1.22'
+
+- name: Install semrel
+  run: go install github.com/GoSemantics/semrel/cmd/semrel@latest
+```
+
+## Shell completion
+
+Auto-completion scripts can be generated for bash, zsh, fish, and PowerShell:
+
+```bash
+# bash
+semrel completion bash > /etc/bash_completion.d/semrel
+
+# zsh
+semrel completion zsh > "${fpath[1]}/_semrel"
+
+# fish
+semrel completion fish | source
+```

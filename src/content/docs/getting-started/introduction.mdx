@@ -1,0 +1,56 @@
+---
+title: Introduction
+description: What is semrel and why should you use it?
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+**semrel** automates your entire release pipeline by reading [Conventional Commits](https://www.conventionalcommits.org/), calculating the correct next [SemVer](https://semver.org/) version, generating a changelog, and triggering configurable release plugins — all without manual intervention.
+
+## Why semrel?
+
+Manual versioning is error-prone and slow. semrel removes the guesswork:
+
+- A `feat:` commit bumps the **minor** version.
+- A `fix:` commit bumps the **patch** version.
+- A commit with `BREAKING CHANGE:` in the footer bumps the **major** version.
+- Everything is reproducible and auditable through your git history.
+
+## Core Features
+
+<CardGrid>
+  <Card title="Automated Versioning" icon="approve-check">
+    Analyses Conventional Commits since the last tag and determines the correct SemVer bump automatically.
+  </Card>
+  <Card title="Plugin System" icon="puzzle">
+    Every step of the release pipeline — VCS provider, commit analyser, changelog generator, file updater, notifications — is a swappable gRPC plugin.
+  </Card>
+  <Card title="Monorepo Support" icon="seti:folder">
+    Version multiple independent modules inside one repository, each with its own tag history.
+  </Card>
+  <Card title="Language Agnostic" icon="translate">
+    Plugins communicate over gRPC, so they can be written in any language that has a Protobuf code generator.
+  </Card>
+</CardGrid>
+
+## How it works
+
+```
+ git log  ──►  CommitAnalyzer  ──►  next SemVer
+                                         │
+                             ChangelogGenerator
+                                         │
+                               FilesUpdater (optional)
+                                         │
+                             ProviderPlugin (tag / release)
+                                         │
+                               HooksPlugin (notify)
+```
+
+Each box is a separate gRPC plugin process. semrel orchestrates them and passes a `ReleaseContext` that contains the full commit list, current and next version, and your plugin config.
+
+## Next steps
+
+- [Install semrel](/getting-started/installation/)
+- [Run your first release in 5 minutes](/getting-started/quick-start/)
+- [Understand the configuration file](/guide/configuration/)

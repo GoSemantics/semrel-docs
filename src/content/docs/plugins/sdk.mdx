@@ -1,0 +1,143 @@
+---
+title: Plugin SDK
+description: Build a semrel plugin using the Go SDK.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The Plugin SDK (`github.com/GoSemantics/semrel-plugins`) provides the generated Protobuf types and helper scaffolding for writing semrel plugins in Go. Plugins in other languages can use the raw `.proto` file from the main repository.
+
+## Prerequisites
+
+- Go ≥ 1.22
+- Familiarity with gRPC and Protobuf
+
+## Creating a Go plugin
+
+<Steps>
+
+1. **Create a new module**
+
+   ```bash
+   mkdir my-semrel-plugin
+   cd my-semrel-plugin
+   go mod init github.com/myorg/my-semrel-plugin
+   go get github.com/GoSemantics/semrel-plugins
+   ```
+
+2. **Implement the plugin interface**
+
+   Each plugin type corresponds to a gRPC service defined in [`semantic_release.proto`](https://github.com/GoSemantics/semrel/blob/main/api/proto/v1/semantic_release.proto).
+
+   The following example implements a `CommitAnalyzerPlugin` that bumps `minor` for any `feat:` commit and `patch` for everything else:
+
+   ```go
+   package main
+
+   import (
+     "context"
+     "strings"
+
+     semrelv1 "github.com/GoSemantics/semrel-plugins/gen/v1"
+   )
+
+   type myAnalyzer struct {
+     semrelv1.UnimplementedCommitAnalyzerPluginServer
+   }
+
+   func (a *myAnalyzer) AnalyzeCommits(
+     ctx context.Context,
+     req *semrelv1.AnalyzeCommitsRequest,
+   ) (*semrelv1.AnalyzeCommitsResponse, error) {
+     bump := semrelv1.BumpLevel_BUMP_LEVEL_NONE
+     for _, c := range req.Ctx.Commits {
+       msg := c.RawMessage
+       if strings.Contains(msg, "BREAKING CHANGE") {
+         return &semrelv1.AnalyzeCommitsResponse{
+           Bump:   semrelv1.BumpLevel_BUMP_LEVEL_MAJOR,
+           Reason: "breaking change detected",
+         }, nil
+       }
+       if strings.HasPrefix(msg, "feat") {
+         bump = semrelv1.BumpLevel_BUMP_LEVEL_MINOR
+       } else if strings.HasPrefix(msg, "fix") && bump < semrelv1.BumpLevel_BUMP_LEVEL_MINOR {
+         bump = semrelv1.BumpLevel_BUMP_LEVEL_PATCH
+       }
+     }
+     return &semrelv1.AnalyzeCommitsResponse{Bump: bump}, nil
+   }
+   ```
+
+3. **Start the gRPC server**
+
+   semrel expects the plugin to print its listening port to stdout, then wait for connections:
+
+   ```go
+   package main
+
+   import (
+     "fmt"
+     "net"
+     "os"
+
+     semrelv1 "github.com/GoSemantics/semrel-plugins/gen/v1"
+     "google.golang.org/grpc"
+   )
+
+   func main() {
+     lis, err := net.Listen("tcp", "127.0.0.1:0") // port 0 = OS picks one
+     if err != nil {
+       fmt.Fprintln(os.Stderr, err)
+       os.Exit(1)
+     }
+
+     fmt.Println(lis.Addr().(*net.TCPAddr).Port) // semrel reads this
+
+     srv := grpc.NewServer()
+     semrelv1.RegisterCommitAnalyzerPluginServer(srv, &myAnalyzer{})
+     srv.Serve(lis)
+   }
+   ```
+
+4. **Build and install the plugin**
+
+   ```bash
+   go build -o .semrel/my-analyzer .
+   ```
+
+5. **Register it in `.semrel.yaml`**
+
+   ```yaml
+   plugins:
+     - name: my-analyzer
+       path: ./.semrel/my-analyzer
+   ```
+
+</Steps>
+
+## Implementing multiple interfaces
+
+A single plugin binary can register multiple gRPC services on the same server:
+
+```go
+semrelv1.RegisterCommitAnalyzerPluginServer(srv, &myAnalyzer{})
+semrelv1.RegisterChangelogGeneratorPluginServer(srv, &myChangelog{})
+```
+
+## ReleaseContext
+
+Every RPC receives a `ReleaseContext` in its request. It contains:
+
+| Field | Type | Description |
+|---|---|---|
+| `repo_owner` / `repo_name` | string | Repository identity |
+| `branch` | string | Branch being released |
+| `last_version` | SemanticVersion | Previous release tag |
+| `next_version` | SemanticVersion | Calculated next version |
+| `commits` | []Commit | Commits since last release |
+| `dry_run` | bool | When `true`, no side-effects should be applied |
+| `config` | map\<string, string\> | Plugin args from `.semrel.yaml` |
+
+<Aside type="tip">
+  Always respect the `dry_run` flag. When it is `true`, your plugin should simulate its work and return the same response it would for a real run, but without persisting anything.
+</Aside>

@@ -1,0 +1,84 @@
+---
+title: Configuration
+description: All .semrel.yaml configuration options explained.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+All semrel behaviour is controlled by a single YAML file, `.semrel.yaml`, in the root of your repository. You can specify a different path with `--config`.
+
+## Full example
+
+```yaml
+version: 1
+
+branches:
+  - name: main
+  - name: next
+    prerelease: true
+  - name: "release/+([0-9])+([0-9]).x"
+
+release:
+  rules:
+    - type: feat
+      bump: minor
+    - type: fix
+      bump: patch
+    - type: perf
+      bump: patch
+    - type: revert
+      bump: patch
+    # Breaking changes are always a major bump regardless of type.
+    # Triggered by a "BREAKING CHANGE:" footer or a "!" suffix (feat!:).
+
+plugins:
+  - name: github
+    args:
+      owner: MyOrg
+      repo: my-repo
+  - name: conventional-commits
+  - name: slack-notify
+    path: ./.semrel/slack-notify  # path to a local plugin binary
+    args:
+      webhook_url: "https://hooks.slack.com/..."
+```
+
+## `version`
+
+The config schema version. Always set to `1` for now.
+
+## `branches`
+
+A list of branches from which releases can be made.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `name` | string | — | Branch name or glob pattern |
+| `prerelease` | bool | `false` | When `true`, releases from this branch get a pre-release suffix (e.g. `v1.2.0-next.1`) |
+
+Only commits landing on a listed branch trigger a release. All other branches are ignored.
+
+## `release.rules`
+
+Maps commit types (from the Conventional Commits `type:` prefix) to a SemVer bump level.
+
+| Field | Values | Description |
+|---|---|---|
+| `type` | any string | The Conventional Commit type (e.g. `feat`, `fix`, `perf`) |
+| `bump` | `major` \| `minor` \| `patch` | The version component to increment |
+
+<Aside type="note">
+  A `BREAKING CHANGE:` footer **always** triggers a `major` bump, regardless of the rule table.
+</Aside>
+
+## `plugins`
+
+An ordered list of plugins to load for the release pipeline.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | yes | Plugin identifier |
+| `path` | string | no | Path to a local plugin binary. If omitted, semrel looks in `.semrel/<name>` |
+| `args` | map | no | Arbitrary key-value pairs passed to every plugin RPC as `ReleaseContext.config` |
+
+Plugins are started as child processes and communicate with semrel over a local gRPC connection. See the [Plugin Overview](/plugins/overview/) for the full plugin type catalogue.

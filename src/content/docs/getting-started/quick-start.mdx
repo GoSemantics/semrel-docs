@@ -1,0 +1,81 @@
+---
+title: Quick Start
+description: Run your first automated release with semrel in under 5 minutes.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Install semrel**
+
+   ```bash
+   go install github.com/GoSemantics/semrel/cmd/semrel@latest
+   ```
+
+2. **Create a minimal config**
+
+   Add a `.semrel.yaml` at the root of your repository:
+
+   ```yaml
+   version: 1
+
+   branches:
+     - name: main
+
+   release:
+     rules:
+       - type: feat
+         bump: minor
+       - type: fix
+         bump: patch
+       - type: perf
+         bump: patch
+   ```
+
+3. **Write commits using Conventional Commits**
+
+   ```bash
+   git commit -m "feat: add user authentication"
+   git commit -m "fix: correct token expiry calculation"
+   ```
+
+4. **Dry-run to preview the release**
+
+   ```bash
+   semrel release --dry-run
+   ```
+
+   semrel will print the calculated next version and the generated changelog without making any changes:
+
+   ```
+   semrel v0.1.0 – release pipeline (dry-run=true, config=.semrel.yaml)
+   Next version: v1.1.0
+   Changelog:
+     ## [1.1.0] – 2026-05-23
+     ### Features
+     - add user authentication
+     ### Bug Fixes
+     - correct token expiry calculation
+   ```
+
+5. **Run the real release**
+
+   ```bash
+   semrel release
+   ```
+
+   semrel will create the git tag, publish a GitHub/GitLab release (via the configured provider plugin), and trigger any notification hooks.
+
+</Steps>
+
+<Aside type="caution">
+  semrel is in active development. Some pipeline steps are not yet wired up end-to-end. Use `--dry-run` to verify behaviour before running in CI.
+</Aside>
+
+## Next steps
+
+- [Full CLI reference](/guide/cli/)
+- [All configuration options](/guide/configuration/)
+- [Monorepo support](/guide/monorepo/)
+- [Writing a plugin](/plugins/overview/)

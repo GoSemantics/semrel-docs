@@ -1,0 +1,75 @@
+---
+title: CLI Reference
+description: Full reference for all semrel commands and flags.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Global flags
+
+These flags are available on every command:
+
+| Flag | Default | Description |
+|---|---|---|
+| `--config` | `.semrel.yaml` | Path to the configuration file |
+| `--dry-run` | `false` | Simulate the release without making any changes |
+| `--version` | — | Print the semrel version and exit |
+| `--help` | — | Show help for any command |
+
+## `semrel release`
+
+Runs the full release pipeline:
+
+1. Loads plugins from `.semrel/`
+2. Verifies CI conditions (`CIConditionPlugin`)
+3. Fetches commits since the last release (`ProviderPlugin.GetCommitsSince`)
+4. Analyses commits and determines the version bump (`CommitAnalyzerPlugin`)
+5. Generates the changelog (`ChangelogGeneratorPlugin`)
+6. Updates version strings in tracked files (`FilesUpdaterPlugin`)
+7. Creates the git tag and platform release (`ProviderPlugin.CreateRelease`)
+8. Calls success / failure hooks (`HooksPlugin`)
+
+```bash
+semrel release [flags]
+```
+
+**Examples:**
+
+```bash
+# Preview what the release would do
+semrel release --dry-run
+
+# Use a non-default config location
+semrel release --config ./config/semrel.yaml
+
+# Dry-run with a custom config
+semrel release --dry-run --config ./config/semrel.yaml
+```
+
+<Aside type="note">
+  Full pipeline execution is under active development. See [issue #2](https://github.com/GoSemantics/semrel/issues/2) for progress.
+</Aside>
+
+## `semrel lint`
+
+Validates commit messages since the last release against the configured rules. Useful as a pre-merge CI check.
+
+```bash
+semrel lint [flags]
+```
+
+**Examples:**
+
+```bash
+# Lint commits using the default config
+semrel lint
+
+# Lint with a custom config
+semrel lint --config ./config/semrel.yaml
+```
+
+Exits with code `0` if all commits are valid, `1` otherwise. CI systems can use this to block merges of non-conformant commits.
+
+<Aside type="note">
+  Lint command is under active development. See [issue #47](https://github.com/GoSemantics/semrel/issues/47) for progress.
+</Aside>

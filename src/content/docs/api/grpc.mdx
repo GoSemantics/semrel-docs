@@ -1,0 +1,220 @@
+---
+title: gRPC API
+description: Full reference for the semrel Protobuf / gRPC plugin API.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The semrel plugin contract is defined in [`api/proto/v1/semantic_release.proto`](https://github.com/GoSemantics/semrel/blob/main/api/proto/v1/semantic_release.proto). All plugin types implement one or more of the services described below.
+
+<Aside type="note">
+  The proto file is the authoritative source of truth. This page documents the current state of the API.
+</Aside>
+
+## Shared types
+
+### `SemanticVersion`
+
+| Field | Type | Description |
+|---|---|---|
+| `major` | uint32 | Major version component |
+| `minor` | uint32 | Minor version component |
+| `patch` | uint32 | Patch version component |
+| `pre_release` | string | Pre-release identifier, e.g. `alpha.1`, `rc.2` |
+| `build_metadata` | string | Build metadata, e.g. `20240101` |
+
+### `Commit`
+
+| Field | Type | Description |
+|---|---|---|
+| `sha` | string | Full commit SHA |
+| `raw_message` | string | Raw commit message (subject + body) |
+| `files_changed` | []string | Paths of files changed in this commit |
+| `author_name` | string | Commit author display name |
+| `author_email` | string | Commit author email address |
+| `timestamp` | int64 | Unix timestamp (seconds) |
+
+### `ReleaseContext`
+
+Passed to every plugin RPC. Contains all information a plugin needs.
+
+| Field | Type | Description |
+|---|---|---|
+| `repo_owner` | string | Repository owner |
+| `repo_name` | string | Repository name |
+| `repo_url` | string | Clone URL |
+| `branch` | string | Branch being released |
+| `last_version` | SemanticVersion | Last released version (empty if none) |
+| `next_version` | SemanticVersion | Next calculated version |
+| `commits` | []Commit | Commits since last release |
+| `dry_run` | bool | When `true`, plugins must not apply side-effects |
+| `config` | map\<string, string\> | Plugin args from `.semrel.yaml` |
+
+---
+
+## `ProviderPlugin`
+
+Abstracts VCS platform operations (GitHub, GitLab, Gitea, bare git).
+
+### `GetLastRelease`
+
+Returns the last released version and its tag SHA.
+
+```protobuf
+rpc GetLastRelease(GetLastReleaseRequest) returns (GetLastReleaseResponse);
+```
+
+| Response field | Type | Description |
+|---|---|---|
+| `version` | SemanticVersion | Last release. Empty if no prior release exists |
+| `tag_sha` | string | SHA of the corresponding git tag object |
+
+### `GetCommitsSince`
+
+Returns all commits between a given ref and HEAD.
+
+```protobuf
+rpc GetCommitsSince(GetCommitsSinceRequest) returns (GetCommitsSinceResponse);
+```
+
+| Request field | Type | Description |
+|---|---|---|
+| `ctx` | ReleaseContext | Release context |
+| `since_sha` | string | SHA to start listing from (exclusive) |
+
+### `CreateRelease`
+
+Creates (or updates) the VCS release and git tag for `next_version`.
+
+```protobuf
+rpc CreateRelease(CreateReleaseRequest) returns (CreateReleaseResponse);
+```
+
+| Request field | Type | Description |
+|---|---|---|
+| `ctx` | ReleaseContext | Release context |
+| `changelog` | string | Rendered release notes from `ChangelogGeneratorPlugin` |
+
+### `UploadAsset`
+
+Uploads a release artifact to an existing release.
+
+```protobuf
+rpc UploadAsset(UploadAssetRequest) returns (UploadAssetResponse);
+```
+
+| Request field | Type | Description |
+|---|---|---|
+| `release_id` | string | Platform-specific release identifier from `CreateRelease` |
+| `asset_path` | string | Absolute path on the local filesystem |
+| `asset_name` | string | Display name / filename in the release |
+| `content_type` | string | MIME type of the asset |
+
+---
+
+## `CIConditionPlugin`
+
+Verifies the release is running in an authorised CI environment.
+
+### `VerifyConditions`
+
+```protobuf
+rpc VerifyConditions(VerifyConditionsRequest) returns (VerifyConditionsResponse);
+```
+
+| Response field | Type | Description |
+|---|---|---|
+| `error_message` | string | Non-empty means abort. Empty means OK |
+| `details` | string | Human-readable remediation hint |
+
+---
+
+## `CommitAnalyzerPlugin`
+
+Parses commits and determines the required SemVer bump.
+
+### `BumpLevel` enum
+
+| Value | Description |
+|---|---|
+| `BUMP_LEVEL_NONE` | No release required |
+| `BUMP_LEVEL_PATCH` | Patch increment (e.g. `1.0.0` → `1.0.1`) |
+| `BUMP_LEVEL_MINOR` | Minor increment (e.g. `1.0.0` → `1.1.0`) |
+| `BUMP_LEVEL_MAJOR` | Major increment (e.g. `1.0.0` → `2.0.0`) |
+
+### `AnalyzeCommits`
+
+```protobuf
+rpc AnalyzeCommits(AnalyzeCommitsRequest) returns (AnalyzeCommitsResponse);
+```
+
+| Response field | Type | Description |
+|---|---|---|
+| `bump` | BumpLevel | Required version bump |
+| `reason` | string | Human-readable explanation |
+
+---
+
+## `ChangelogGeneratorPlugin`
+
+Renders release notes from the commit list.
+
+### `GenerateNotes`
+
+```protobuf
+rpc GenerateNotes(GenerateNotesRequest) returns (GenerateNotesResponse);
+```
+
+| Response field | Type | Description |
+|---|---|---|
+| `notes` | string | Rendered changelog fragment (Markdown, RST, etc.) |
+
+---
+
+## `FilesUpdaterPlugin`
+
+Writes the next version into tracked project files before the release commit.
+
+### `UpdateFiles`
+
+```protobuf
+rpc UpdateFiles(UpdateFilesRequest) returns (UpdateFilesResponse);
+```
+
+| Response field | Type | Description |
+|---|---|---|
+| `updated_files` | []string | Paths of files that were modified |
+| `error_message` | string | Non-empty indicates a failure |
+
+---
+
+## `HooksPlugin`
+
+Lifecycle callbacks for notifications.
+
+### `OnSuccess`
+
+Called after a successful release.
+
+```protobuf
+rpc OnSuccess(OnSuccessRequest) returns (OnSuccessResponse);
+```
+
+| Request field | Type | Description |
+|---|---|---|
+| `ctx` | ReleaseContext | Release context |
+| `release_url` | string | URL of the newly created release |
+
+### `OnFail`
+
+Called when the pipeline encounters an unrecoverable error.
+
+```protobuf
+rpc OnFail(OnFailRequest) returns (OnFailResponse);
+```
+
+| Request field | Type | Description |
+|---|---|---|
+| `ctx` | ReleaseContext | Release context |
+| `error_message` | string | Error that caused the failure |
+
