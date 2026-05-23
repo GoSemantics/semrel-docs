@@ -13,7 +13,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Docs',
-          autogenerate: { directory: 'docs' },
+          items: [{ autogenerate: { directory: 'docs' } }],
         },
       ],
     }),

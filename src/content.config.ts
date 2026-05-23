@@ -7,6 +7,4 @@ const docs = defineCollection({
   }),
 });
 
-export const collections = {
-  docs,
-};
+export const collections = { docs };
