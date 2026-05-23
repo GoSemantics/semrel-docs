@@ -1,0 +1,6 @@
+﻿# Documentation & Website Maintainers
+* @GoSemantics/maintainers
+
+# Docs pages
+/src/content/docs/ @GoSemantics/maintainers
+/astro.config.mjs @GoSemantics/maintainers
