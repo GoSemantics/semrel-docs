@@ -8,43 +8,26 @@ export default defineConfig({
     starlight({
       title: 'semrel',
       description: 'Semantic Versioning for Go. Automated, monorepo-aware, plugin-based.',
-      logo: {
-        src: './src/assets/logo.svg',
-      },
-      social: {
-        github: 'https://github.com/GoSemantics/semrel',
-        linkedin: 'https://www.linkedin.com/company/gosemantics',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/GoSemantics/semrel' },
+        { icon: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/company/gosemantics' },
+      ],
       sidebar: [
         {
           label: 'Getting Started',
-          items: [
-            { label: 'Introduction', slug: 'getting-started/introduction' },
-            { label: 'Installation', slug: 'getting-started/installation' },
-            { label: 'Quick Start', slug: 'getting-started/quick-start' },
-          ],
+          autogenerate: { directory: 'getting-started' },
         },
         {
           label: 'User Guide',
-          items: [
-            { label: 'CLI Reference', slug: 'guide/cli' },
-            { label: 'Configuration', slug: 'guide/configuration' },
-            { label: 'Monorepo Support', slug: 'guide/monorepo' },
-          ],
+          autogenerate: { directory: 'guide' },
         },
         {
           label: 'Plugin Development',
-          items: [
-            { label: 'Overview', slug: 'plugins/overview' },
-            { label: 'SDK Guide', slug: 'plugins/sdk' },
-            { label: 'Examples', slug: 'plugins/examples' },
-          ],
+          autogenerate: { directory: 'plugins' },
         },
         {
           label: 'API',
-          items: [
-            { label: 'gRPC API', slug: 'api/grpc' },
-          ],
+          autogenerate: { directory: 'api' },
         },
       ],
     }),
