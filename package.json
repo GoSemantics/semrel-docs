@@ -1,8 +1,8 @@
-﻿{
+{
   "name": "semrel-docs",
   "type": "module",
   "version": "0.1.0",
-  "description": "Documentation & website for go-semrel",
+  "description": "Documentation & website for semrel",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -14,3 +14,4 @@
     "@astrojs/starlight": "^0.35.2"
   }
 }
+

@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'astro/config';
+import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
@@ -6,13 +6,13 @@ export default defineConfig({
   output: 'static',
   integrations: [
     starlight({
-      title: 'go-semrel',
+      title: 'semrel',
       description: 'Semantic Versioning for Go. Automated, monorepo-aware, plugin-based.',
       logo: {
         src: './src/assets/logo.svg',
       },
       social: {
-        github: 'https://github.com/GoSemantics/go-semrel',
+        github: 'https://github.com/GoSemantics/semrel',
         linkedin: 'https://www.linkedin.com/company/gosemantics',
       },
       sidebar: [
@@ -50,3 +50,4 @@ export default defineConfig({
     }),
   ],
 });
+

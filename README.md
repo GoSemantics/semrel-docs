@@ -1,6 +1,6 @@
-﻿# semrel-docs
+# semrel-docs
 
-Documentation & website for go-semrel built with Astro and Starlight.
+Documentation & website for semrel built with Astro and Starlight.
 
 ## Development
 
@@ -25,4 +25,5 @@ Deploys to GitHub Pages at `semrel.io` via GitHub Actions.
 
 - [Astro Documentation](https://docs.astro.build)
 - [Starlight Documentation](https://starlight.astro.build)
-- [go-semrel Repository](https://github.com/GoSemantics/go-semrel)
+- [semrel Repository](https://github.com/GoSemantics/semrel)
+
