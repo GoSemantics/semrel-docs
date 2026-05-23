@@ -10,11 +10,10 @@ semrel's release pipeline is entirely composed of plugins. Every capability — 
 ## How plugins work
 
 1. semrel starts each plugin as a **child process** from your `.semrel/` directory.
-2. The plugin listens on a randomly chosen local port and prints it to stdout.
-3. semrel connects and calls the appropriate RPCs in pipeline order.
-4. After the pipeline completes, semrel terminates all plugin processes.
-
-Because the transport is gRPC/Protobuf, plugins can be written in **any language** — Go, Rust, Python, Node.js, etc.
+2. [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin) performs a handshake over the plugin's **stdout** — the plugin binary must never write anything else to stdout.
+3. All plugin logs must go to **stderr** (via `hclog` in Go).
+4. semrel connects over the negotiated gRPC socket and calls the appropriate RPCs in pipeline order.
+5. After the pipeline completes, semrel terminates all plugin processes.
 
 ## Plugin types
 

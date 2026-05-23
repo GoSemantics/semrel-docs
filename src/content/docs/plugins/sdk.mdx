@@ -9,8 +9,16 @@ The Plugin SDK (`github.com/GoSemantics/semrel-plugins`) provides the generated 
 
 ## Prerequisites
 
-- Go ≥ 1.22
+- Go ≥ 1.24
 - Familiarity with gRPC and Protobuf
+
+## ⚠️ Critical: stdout is reserved
+
+<Aside type="caution">
+  semrel uses [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin) as the plugin transport. go-plugin performs a handshake over **stdout** at startup — it writes a magic line that the host reads to discover the gRPC socket address.
+
+  **Never write anything to stdout in a plugin binary.** Any output corrupts the handshake and silently breaks the connection. All logs must go to **stderr**, using `hclog` with `Output: os.Stderr`.
+</Aside>
 
 ## Creating a Go plugin
 
@@ -68,34 +76,36 @@ The Plugin SDK (`github.com/GoSemantics/semrel-plugins`) provides the generated 
    }
    ```
 
-3. **Start the gRPC server**
+3. **Serve via go-plugin**
 
-   semrel expects the plugin to print its listening port to stdout, then wait for connections:
+   Use `plugin.Serve()` — go-plugin manages the handshake protocol over stdout automatically. Use `hclog` for all logging so output goes to stderr:
 
    ```go
    package main
 
    import (
-     "fmt"
-     "net"
      "os"
 
+     hclog "github.com/hashicorp/go-hclog"
+     goplugin "github.com/hashicorp/go-plugin"
      semrelv1 "github.com/GoSemantics/semrel-plugins/gen/v1"
-     "google.golang.org/grpc"
    )
 
    func main() {
-     lis, err := net.Listen("tcp", "127.0.0.1:0") // port 0 = OS picks one
-     if err != nil {
-       fmt.Fprintln(os.Stderr, err)
-       os.Exit(1)
-     }
+     logger := hclog.New(&hclog.LoggerOptions{
+       Name:   "my-analyzer",
+       Output: os.Stderr, // MUST be stderr — stdout is reserved for go-plugin handshake
+       Level:  hclog.Info,
+     })
 
-     fmt.Println(lis.Addr().(*net.TCPAddr).Port) // semrel reads this
-
-     srv := grpc.NewServer()
-     semrelv1.RegisterCommitAnalyzerPluginServer(srv, &myAnalyzer{})
-     srv.Serve(lis)
+     goplugin.Serve(&goplugin.ServeConfig{
+       HandshakeConfig: semrelv1.HandshakeConfig,
+       Plugins: map[string]goplugin.Plugin{
+         "commit-analyzer": &semrelv1.CommitAnalyzerPlugin{Impl: &myAnalyzer{}},
+       },
+       GRPCServer: goplugin.DefaultGRPCServer,
+       Logger:     logger,
+     })
    }
    ```
 

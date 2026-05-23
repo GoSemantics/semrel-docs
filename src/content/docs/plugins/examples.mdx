@@ -30,20 +30,19 @@ Official plugins live in the [GoSemantics/semrel-plugins](https://github.com/GoS
 
 ## Minimal CommitAnalyzer (Go)
 
-A bare-bones commit analyser in fewer than 50 lines:
+A bare-bones commit analyser using go-plugin:
 
 ```go
 package main
 
 import (
   "context"
-  "fmt"
-  "net"
   "os"
   "strings"
 
+  hclog "github.com/hashicorp/go-hclog"
+  goplugin "github.com/hashicorp/go-plugin"
   semrelv1 "github.com/GoSemantics/semrel-plugins/gen/v1"
-  "google.golang.org/grpc"
 )
 
 type analyzer struct{ semrelv1.UnimplementedCommitAnalyzerPluginServer }
@@ -66,22 +65,26 @@ func (a *analyzer) AnalyzeCommits(
 }
 
 func main() {
-  lis, _ := net.Listen("tcp", "127.0.0.1:0")
-  fmt.Println(lis.Addr().(*net.TCPAddr).Port)
-  srv := grpc.NewServer()
-  semrelv1.RegisterCommitAnalyzerPluginServer(srv, &analyzer{})
-  if err := srv.Serve(lis); err != nil {
-    fmt.Fprintln(os.Stderr, err); os.Exit(1)
-  }
+  // All logs MUST go to stderr. stdout is reserved for the go-plugin handshake.
+  logger := hclog.New(&hclog.LoggerOptions{Name: "my-analyzer", Output: os.Stderr})
+
+  goplugin.Serve(&goplugin.ServeConfig{
+    HandshakeConfig: semrelv1.HandshakeConfig,
+    Plugins: map[string]goplugin.Plugin{
+      "commit-analyzer": &semrelv1.CommitAnalyzerPlugin{Impl: &analyzer{}},
+    },
+    GRPCServer: goplugin.DefaultGRPCServer,
+    Logger:     logger,
+  })
 }
 ```
 
 ## Minimal HooksPlugin (Python)
 
-A Slack notification hook in Python, showing that plugins don’t have to be written in Go:
+A Slack notification hook in Python. Note: Python plugins must use `sys.stderr` for all output — `sys.stdout` is reserved for the go-plugin handshake:
 
 ```python
-import os, sys, socket, concurrent.futures
+import sys, concurrent.futures
 import grpc
 from semrel_v1 import semantic_release_pb2, semantic_release_pb2_grpc
 
@@ -98,15 +101,13 @@ class SlackHook(semantic_release_pb2_grpc.HooksPluginServicer):
         return semantic_release_pb2.OnFailResponse()
 
 if __name__ == "__main__":
-    sock = socket.socket()
-    sock.bind(("127.0.0.1", 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    print(port, flush=True)  # semrel reads this
+    # go-plugin writes the handshake line to stdout automatically.
+    # Our code must never write to stdout.
+    print("starting", file=sys.stderr)  # safe: goes to stderr
     server = grpc.server(concurrent.futures.ThreadPoolExecutor())
     semantic_release_pb2_grpc.add_HooksPluginServicer_to_server(SlackHook(), server)
-    server.add_insecure_port(f"127.0.0.1:{port}")
-    server.start()
+    # go-plugin manages the port/socket and writes the handshake line.
+    # Use the go-plugin Python bridge (semrel-plugins/python) for the serve() call.
     server.wait_for_termination()
 ```
 
