@@ -1,0 +1,105 @@
+---
+title: Plugin Registry
+description: Discover SemRels plugins, understand the registry metadata, and learn how the registry fits into plugin delivery.
+---
+
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+The **SemRels Plugin Registry** is the public catalog for semrel plugins. It is the place where plugin metadata, release versions, download URLs, and checksums come together so semrel can discover and install plugins consistently.
+
+The long-term public home is [registry.semrel.io](https://registry.semrel.io). In the MVP, the machine-readable registry is served from GitHub Pages via the `semrel-registry` repository and exposed as `plugins.json`.
+
+<Aside type="note">
+  Today, the stable public hostname is `registry.semrel.io`, while the MVP payload is published from GitHub Pages. This keeps the URL stable even as the hosting model evolves.
+</Aside>
+
+## What the registry does
+
+<CardGrid>
+  <Card title="Discovery" icon="magnifier">
+    Helps users find plugins by name, category, author, repository, or tags.
+  </Card>
+  <Card title="Delivery" icon="document">
+    Points semrel to the correct release asset for the current operating system and CPU architecture.
+  </Card>
+  <Card title="Integrity" icon="approve-check-circle">
+    Publishes SHA-256 checksums so downloaded binaries can be verified before use.
+  </Card>
+</CardGrid>
+
+## Registry URLs
+
+- Public registry host: [registry.semrel.io](https://registry.semrel.io)
+- MVP static index: [https://semrels.github.io/semrel-registry/plugins.json](https://semrels.github.io/semrel-registry/plugins.json)
+- Source repository: [SemRels/semrel-registry](https://github.com/SemRels/semrel-registry)
+
+## How to find plugins
+
+You can use the registry in a few different ways:
+
+1. **Browse by category** such as provider, condition, changelog, files updater, or hooks.
+2. **Search by plugin name** when you already know the binary you want to install.
+3. **Check compatibility metadata** before adopting a plugin in CI.
+4. **Review repository and changelog links** to understand who maintains the plugin and what changed.
+
+semrel itself consumes the registry as structured metadata. When a plugin is not already available locally, semrel can fetch the registry index, resolve a compatible release, download the binary, verify its checksum, and cache it for later runs.
+
+## Metadata schema overview
+
+The registry payload starts with a small root document and then lists plugins with one or more published versions.
+
+| Field | Purpose |
+| --- | --- |
+| `schemaVersion` | Version of the top-level registry payload |
+| `generatedAt` | Timestamp written when the index is generated |
+| `plugins` | Array of plugin records |
+| `plugins[].name` | Stable plugin identifier used by semrel |
+| `plugins[].category` | High-level plugin type |
+| `plugins[].repository` | Source repository URL |
+| `plugins[].versions[].version` | Released plugin version |
+| `plugins[].versions[].downloadUrl` | Direct binary download URL |
+| `plugins[].versions[].checksums` | SHA-256 checksums keyed by platform such as `linux_amd64` |
+| `plugins[].versions[].compatibility` | Optional minimum semrel or gRPC compatibility hints |
+
+```json
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-24T12:00:00Z",
+  "plugins": [
+    {
+      "name": "provider-github",
+      "description": "GitHub provider plugin for semrel",
+      "author": "SemRels",
+      "license": "Apache-2.0",
+      "category": "provider",
+      "repository": "https://github.com/SemRels/semrel-plugins",
+      "tags": ["github", "provider"],
+      "versions": [
+        {
+          "version": "1.2.3",
+          "releaseDate": "2026-05-24T12:00:00Z",
+          "downloadUrl": "https://github.com/SemRels/semrel-plugins/releases/download/v1.2.3/provider-github_linux_amd64",
+          "checksums": {
+            "linux_amd64": "<sha256>",
+            "windows_amd64": "<sha256>"
+          },
+          "compatibility": {
+            "minSemrelVersion": "0.2.0",
+            "gRPCVersion": "v1"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Publishing a plugin
+
+If you maintain a plugin, continue with the [Plugin Publishing Guide](/plugins/publishing/) for the release flow, naming recommendations, and checksum steps.
+
+## Related docs
+
+- [Plugin Overview](/plugins/overview/)
+- [Plugin Publishing Guide](/plugins/publishing/)
+- [Registry Web Service (Phase 2)](/infrastructure/web-service/)

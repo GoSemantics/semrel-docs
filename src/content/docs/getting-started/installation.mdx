@@ -54,6 +54,29 @@ semrel version v0.1.0
   semrel is still in early development. Binary releases may not yet be available for all platforms. Using `go install` is the most reliable installation method right now.
 </Aside>
 
+## Installing plugins from the registry
+
+When a plugin is referenced by name and no matching binary is available locally, semrel can resolve it through the **SemRels Plugin Registry**.
+
+The flow looks like this:
+
+1. semrel checks the local plugin directory first.
+2. If the binary is missing, semrel fetches registry metadata from `registry.semrel.io` (MVP: GitHub Pages-backed `plugins.json`).
+3. It downloads the platform-specific release asset for the current OS and architecture.
+4. It verifies the downloaded file against the published SHA-256 checksum.
+5. It caches the registry metadata and binary for reuse on later runs.
+
+By default, the registry metadata cache lives under `.semrel/registry-cache`, while downloaded binaries are reused from the local `.semrel/` cache layout. Local binaries still take precedence, which keeps CI predictable and allows offline reuse after the first successful download.
+
+```bash
+# Optional registry overrides
+export SEMREL_REGISTRY_URL=https://registry.semrel.io
+export SEMREL_CACHE_DIR=.semrel
+export SEMREL_CACHE_TTL=24h
+```
+
+For more detail, see the [Plugin Registry overview](/plugins/registry/) and the [Plugin Publishing Guide](/plugins/publishing/).
+
 ## CI / CD
 
 For GitHub Actions, add a setup step before calling `semrel release`:

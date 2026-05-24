@@ -1,0 +1,159 @@
+---
+title: Plugin Publishing Guide
+description: Publish a semrel plugin release, generate registry metadata, and submit it to the SemRels Plugin Registry.
+---
+
+import { Steps, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+This guide is for **plugin authors** who want to publish a plugin release and make it discoverable through the SemRels Plugin Registry.
+
+The short version is:
+
+1. cut a versioned release in your plugin repository,
+2. upload platform-specific binaries,
+3. generate SHA-256 checksums,
+4. submit the release metadata to the registry repository.
+
+<CardGrid>
+  <Card title="Release source" icon="github">
+    Publish from your own plugin repository. The registry indexes releases; it does not build your binaries for you.
+  </Card>
+  <Card title="Binary delivery" icon="document">
+    Upload direct executable assets for each supported platform. semrel downloads these files as-is.
+  </Card>
+  <Card title="Verification" icon="approve-check-circle">
+    Every registry entry should include SHA-256 checksums so semrel can validate the downloaded binary.
+  </Card>
+</CardGrid>
+
+## Release naming convention
+
+Use standard SemVer tags and GitHub release names:
+
+- Stable release: `v1.2.3`
+- Prerelease: `v1.2.3-rc.1`
+- Patch release: `v1.2.4`
+
+Keep the git tag, GitHub release title, and registry metadata version aligned exactly. This avoids broken links and makes it clear which asset belongs to which plugin version.
+
+## Binary asset naming
+
+The registry client downloads the asset referenced in `downloadUrl` directly, so the release asset must be the executable binary itself — **not** a `.zip` or `.tar.gz` archive.
+
+The filename can technically be any direct binary asset, but the following convention keeps releases easy to inspect and automate:
+
+| Platform | Recommended asset name |
+| --- | --- |
+| Linux amd64 | `provider-github_linux_amd64` |
+| Linux arm64 | `provider-github_linux_arm64` |
+| macOS arm64 | `provider-github_darwin_arm64` |
+| Windows amd64 | `provider-github_windows_amd64.exe` |
+
+Replace `provider-github` with your plugin's registry name.
+
+<Aside type="tip">
+  Keep the plugin name stable across repository name, release assets, and registry metadata. Consistent naming makes debugging much easier.
+</Aside>
+
+## Checksum generation
+
+Generate **SHA-256** checksums for every uploaded asset.
+
+### Linux / macOS
+
+```bash
+sha256sum provider-github_linux_amd64
+sha256sum provider-github_darwin_arm64
+```
+
+### PowerShell
+
+```powershell
+Get-FileHash .\provider-github_windows_amd64.exe -Algorithm SHA256
+```
+
+The values go into the registry metadata under platform keys such as `linux_amd64`, `darwin_arm64`, or `windows_amd64`.
+
+## Step-by-step release process
+
+<Steps>
+
+1. **Prepare the plugin release**
+
+   - update your changelog or release notes
+   - build binaries for each supported platform
+   - confirm the plugin writes logs to `stderr`, not `stdout`
+
+2. **Create a version tag**
+
+   ```bash
+   git tag v1.2.3
+   git push origin v1.2.3
+   ```
+
+3. **Upload release assets**
+
+   Attach direct executable binaries to the GitHub release, for example:
+
+   ```text
+   provider-github_linux_amd64
+   provider-github_darwin_arm64
+   provider-github_windows_amd64.exe
+   ```
+
+4. **Generate SHA-256 checksums**
+
+   Record one checksum per OS/architecture pair.
+
+5. **Prepare registry metadata**
+
+   Open a pull request against [`SemRels/semrel-registry`](https://github.com/SemRels/semrel-registry) with the metadata for the new plugin or version.
+
+   ```json
+   {
+     "name": "provider-github",
+     "description": "GitHub provider plugin for semrel",
+     "author": "SemRels",
+     "license": "Apache-2.0",
+     "category": "provider",
+     "repository": "https://github.com/SemRels/semrel-plugins",
+     "versions": [
+       {
+         "version": "1.2.3",
+         "releaseDate": "2026-05-24T12:00:00Z",
+         "downloadUrl": "https://github.com/SemRels/semrel-plugins/releases/download/v1.2.3/provider-github_linux_amd64",
+         "checksums": {
+           "linux_amd64": "<sha256>",
+           "darwin_arm64": "<sha256>",
+           "windows_amd64": "<sha256>"
+         }
+       }
+     ]
+   }
+   ```
+
+6. **Wait for registry validation and merge**
+
+   After the PR merges, confirm that your plugin is present in `plugins.json` and reachable through the public registry endpoint.
+
+</Steps>
+
+## Release guide and references
+
+- [go-semrel-registry release guide](https://github.com/SemRels/semrel-registry/blob/main/docs/release-guide.md)
+- [Plugin submission overview](https://github.com/SemRels/semrel-registry/blob/main/docs/contribute.md)
+- [Plugin Registry overview](/plugins/registry/)
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| Release asset returns `404` | Confirm the GitHub release exists and the `downloadUrl` matches the exact asset name |
+| Checksum mismatch | Recalculate the SHA-256 hash from the uploaded file, not from a local archive or a different build |
+| Plugin not visible in the registry | Wait for the registry PR to merge, then verify `plugins.json` was regenerated |
+| Wrong version selected | Make sure the git tag, release title, and metadata `version` field are identical |
+| Windows download does not start | Ensure the Windows asset ends with `.exe` and points to the executable binary |
+
+<Aside type="caution">
+  semrel validates downloaded files against the checksum published in the registry. If the uploaded asset changes after release, the download will fail until a corrected release and metadata update are published.
+</Aside>
