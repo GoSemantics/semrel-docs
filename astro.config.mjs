@@ -33,6 +33,14 @@ export default defineConfig({
           items: [{ autogenerate: { directory: 'plugins' } }],
         },
         {
+          label: 'Governance',
+          items: [{ autogenerate: { directory: 'governance' } }],
+        },
+        {
+          label: 'Infrastructure',
+          items: [{ autogenerate: { directory: 'infrastructure' } }],
+        },
+        {
           label: 'API',
           items: [{ autogenerate: { directory: 'api' } }],
         },

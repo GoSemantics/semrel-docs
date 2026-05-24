@@ -1,0 +1,89 @@
+---
+title: Registry Web Service
+description: Phase 2 backend architecture for the SemRels Plugin Registry.
+---
+
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+The registry currently ships as a **static `plugins.json` index** served from GitHub Pages. The **Registry Web Service** is the next phase: a Go backend that will power `registry.semrel.io` with richer discovery and management features.
+
+## Why a web service exists
+
+<CardGrid>
+  <Card title="Better discovery" icon="magnifier">
+    A REST API makes it easier to search, filter, paginate, and inspect plugin versions.
+  </Card>
+  <Card title="Operational workflows" icon="pencil">
+    Admin endpoints unlock managed plugin and version updates instead of editing generated files by hand.
+  </Card>
+  <Card title="Future UI" icon="information">
+    The backend creates a foundation for a browser-based registry UI and later an admin dashboard.
+  </Card>
+</CardGrid>
+
+## Phase split
+
+- **Phase 1 (MVP):** static `plugins.json` served through GitHub Pages
+- **Phase 2:** Go web service plus PostgreSQL-backed storage on `registry.semrel.io`
+- **Later:** richer admin workflows, moderation, and dashboard views
+
+## REST API endpoints overview
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /health` | Health check for load balancers and deployment verification |
+| `GET /api/v1/plugins` | List plugins with pagination and optional `category`, `search`, and `sort` filters |
+| `GET /api/v1/plugins/:id` | Fetch a single plugin by numeric ID or plugin name |
+| `GET /api/v1/plugins/:id/versions` | List versions for a plugin with `limit` and `offset` |
+| `POST /api/v1/plugins` | Create a plugin record (admin token required) |
+| `PUT /api/v1/plugins/:id` | Update plugin metadata (admin token required) |
+| `DELETE /api/v1/plugins/:id` | Soft-delete a plugin (admin token required) |
+| `POST /api/v1/plugins/:id/versions` | Create a plugin version record (admin token required) |
+| `GET /api/v1/admin/status` | Placeholder admin status endpoint for future dashboard work |
+
+## Database and deployment
+
+The current backend skeleton uses:
+
+- **Go + Gin** for the HTTP API
+- **PostgreSQL 16** for persistent plugin and version data
+- **`golang-migrate`** to run SQL migrations automatically at startup
+- **Docker** for local development and container image builds
+
+Important runtime settings:
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | HTTP listen address |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `MIGRATE_DIR` | Migration directory loaded on startup |
+| `ENVIRONMENT` | Runtime mode such as `dev` or `prod` |
+| `ADMIN_TOKEN` | Bearer token protecting admin endpoints |
+
+Local development starts PostgreSQL through `docker compose` and runs the API with `go run main.go`.
+
+```bash
+docker compose up -d
+cp .env.example .env
+go run main.go
+curl http://localhost:8080/health
+```
+
+<Aside type="note">
+  The web service complements the static registry; it does not replace the stable need for a machine-readable public plugin index.
+</Aside>
+
+## Later: Admin dashboard
+
+A browser-based admin dashboard is planned for a later phase. The expected goals are:
+
+- manage plugin records without editing generated files directly
+- review versions, checksums, and compatibility metadata
+- support moderation and operational visibility for registry maintainers
+
+For now, the API contains the backend foundations and a placeholder `GET /api/v1/admin/status` route that will evolve alongside the dashboard work.
+
+## Related docs
+
+- [Plugin Registry](/plugins/registry/)
+- [Plugin Publishing Guide](/plugins/publishing/)

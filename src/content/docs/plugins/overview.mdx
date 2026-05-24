@@ -42,6 +42,8 @@ The pipeline defines six plugin interfaces. A single binary can implement one or
 
 ## Plugin discovery
 
+Discover plugins in the [Plugin Registry](/plugins/registry/).
+
 semrel looks for plugin binaries in the `.semrel/` directory at the repository root, or at the path specified by the `path` field in your config:
 
 ```yaml
@@ -52,7 +54,7 @@ plugins:
 ```
 
 <Aside type="tip">
-  Commit your `.semrel/` directory to version control so that your team and CI always use the same plugin versions.
+  Commit your `.semrel/` directory to version control so that your team and CI always use the same plugin versions. If a plugin is missing locally, semrel can also discover it through the [Plugin Registry](/plugins/registry/), download the matching binary, and verify its checksum before caching it.
 </Aside>
 
 ## Plugin lifecycle
@@ -86,6 +88,8 @@ sequenceDiagram
 
 ## Next steps
 
+- [Plugin Registry](/plugins/registry/)
+- [Plugin Publishing Guide](/plugins/publishing/)
 - [Plugin SDK — writing your first plugin](/plugins/sdk/)
 - [Example plugins](/plugins/examples/)
 - [gRPC API reference](/api/grpc/)
