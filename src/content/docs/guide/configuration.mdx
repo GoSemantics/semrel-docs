@@ -5,80 +5,88 @@ description: All .semrel.yaml configuration options explained.
 
 import { Aside } from '@astrojs/starlight/components';
 
-All semrel behaviour is controlled by a single YAML file, `.semrel.yaml`, in the root of your repository. You can specify a different path with `--config`.
+All semrel behavior is controlled by a single YAML file, `.semrel.yaml`, in the root of your repository. You can specify a different path with `--config`.
 
 ## Full example
 
 ```yaml
 version: 1
-
 branches:
   - name: main
-  - name: next
-    prerelease: true
-  - name: "release/+([0-9])+([0-9]).x"
-
-release:
-  rules:
-    - type: feat
-      bump: minor
-    - type: fix
-      bump: patch
-    - type: perf
-      bump: patch
-    - type: revert
-      bump: patch
-    # Breaking changes are always a major bump regardless of type.
-    # Triggered by a "BREAKING CHANGE:" footer or a "!" suffix (feat!:).
-
 plugins:
-  - name: github
+  - uses: github
+    name: github-release
     args:
+      token: ${{ env.GITHUB_TOKEN }}
       owner: MyOrg
       repo: my-repo
-  - name: conventional-commits
-  - name: slack-notify
-    path: ./.semrel/slack-notify  # path to a local plugin binary
+
+  - uses: slack-notify
+    path: /usr/local/bin/semrel-plugin-slack
     args:
-      webhook_url: "https://hooks.slack.com/..."
+      webhook_url: ${{ env.SLACK_WEBHOOK }}
 ```
 
 ## `version`
 
-The config schema version. Always set to `1` for now.
+The config schema version. Always set this to `1`.
 
 ## `branches`
 
 A list of branches from which releases can be made.
 
 | Field | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `name` | string | — | Branch name or glob pattern |
-| `prerelease` | bool | `false` | When `true`, releases from this branch get a pre-release suffix (e.g. `v1.2.0-next.1`) |
+| `prerelease` | bool | `false` | When `true`, releases from this branch get a pre-release suffix |
 
-Only commits landing on a listed branch trigger a release. All other branches are ignored.
-
-## `release.rules`
-
-Maps commit types (from the Conventional Commits `type:` prefix) to a SemVer bump level.
-
-| Field | Values | Description |
-|---|---|---|
-| `type` | any string | The Conventional Commit type (e.g. `feat`, `fix`, `perf`) |
-| `bump` | `major` \| `minor` \| `patch` | The version component to increment |
-
-<Aside type="note">
-  A `BREAKING CHANGE:` footer **always** triggers a `major` bump, regardless of the rule table.
-</Aside>
+Only commits landing on a listed branch trigger a release.
 
 ## `plugins`
 
 An ordered list of plugins to load for the release pipeline.
 
 | Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | yes | Plugin identifier |
-| `path` | string | no | Path to a local plugin binary. If omitted, semrel looks in `.semrel/<name>` |
-| `args` | map | no | Arbitrary key-value pairs passed to every plugin RPC as `ReleaseContext.config` |
+| --- | --- | --- | --- |
+| `uses` | string | yes | Plugin type or install name. By default semrel resolves this to `semrel-plugin-<uses>` |
+| `name` | string | no | Optional instance identifier for this plugin entry |
+| `path` | string | no | Explicit path to a plugin binary |
+| `args` | map | no | Arbitrary key-value pairs passed to the plugin as `SEMREL_PLUGIN_*` environment variables |
 
-Plugins are started as child processes and communicate with semrel over a local gRPC connection. See the [Plugin Overview](/plugins/overview/) for the full plugin type catalogue.
+### Plugin resolution
+
+If `path:` is omitted, semrel resolves plugins in this order:
+
+1. `~/.semrel/plugins/semrel-plugin-<uses>`
+2. `semrel-plugin-<uses>` from `$PATH`
+
+Use `path:` when you want to pin a specific local binary instead of the default discovery flow.
+
+<Aside type="tip">
+  Install official plugins with `semrel plugin install <name>`. By default, the CLI downloads them to `~/.semrel/plugins/`.
+</Aside>
+
+### Plugin arguments as environment variables
+
+Every key in `args:` is exposed to the plugin process as an environment variable prefixed with `SEMREL_PLUGIN_`.
+
+```yaml
+plugins:
+  - uses: github
+    args:
+      token: ${{ env.GITHUB_TOKEN }}
+      owner: MyOrg
+      repo: my-repo
+```
+
+The plugin receives:
+
+| Config key | Environment variable |
+| --- | --- |
+| `token` | `SEMREL_PLUGIN_TOKEN` |
+| `owner` | `SEMREL_PLUGIN_OWNER` |
+| `repo` | `SEMREL_PLUGIN_REPO` |
+
+Plugins also receive release context through environment variables such as `SEMREL_CURRENT_VERSION`, `SEMREL_NEXT_VERSION`, `SEMREL_TAG_NAME`, `SEMREL_CHANGELOG`, and `SEMREL_DRY_RUN`.
+
+semrel plugins are plain executables launched as subprocesses. They do not use gRPC.
