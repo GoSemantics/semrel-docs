@@ -3,80 +3,56 @@ title: Official Plugins
 description: Overview of official SemRel plugins
 ---
 
-# Official Plugins
+Official semrel plugins are published as standalone binaries named `semrel-plugin-<name>`.
 
-SemRel ships with a comprehensive plugin system. Here are the official plugins maintained by the SemRel team.
+Install any official plugin with:
 
-## Available Plugins
+```bash
+semrel plugin install <name>
+```
 
-### Providers
-- **provider-github** - GitHub release provider
-- **provider-gitlab** - GitLab release provider
-- **provider-gitea** - Gitea release provider  
-- **provider-git** - Git CLI provider (bare git, works with any forge)
+For example, `semrel plugin install github` installs the `semrel-plugin-github` binary into `~/.semrel/plugins/` by default.
 
-### CI Conditions
-- **condition-github-actions** - GitHub Actions environment checks
-- **condition-gitlab-ci** - GitLab CI environment checks
-- **condition-gitea-actions** - Gitea Actions environment checks
-- **condition-generic** - Generic CI env var assertions
+## Official plugin catalog
 
-### Analyzers
-- **analyzer-conventional** - Conventional Commits analyzer
-- **analyzer-default** - Default SemVer analyzer
+All official plugin repositories currently exist in the `SemRels` organization. The status below reflects repository availability; some plugins do not have tagged releases yet.
 
-### Generators
-- **generator-changelog-md** - Markdown changelog generator
-- **generator-changelog-html** - HTML changelog generator
-- **generator-release-notes** - Release notes generator
+| Plugin | Category | Binary | Status | Repository |
+| --- | --- | --- | --- | --- |
+| `github` | Provider | `semrel-plugin-github` | Active | [SemRels/provider-github](https://github.com/SemRels/provider-github) |
+| `gitlab` | Provider | `semrel-plugin-gitlab` | Active | [SemRels/provider-gitlab](https://github.com/SemRels/provider-gitlab) |
+| `gitea` | Provider | `semrel-plugin-gitea` | Active | [SemRels/provider-gitea](https://github.com/SemRels/provider-gitea) |
+| `git` | Provider | `semrel-plugin-git` | Active | [SemRels/provider-git](https://github.com/SemRels/provider-git) |
+| `bitbucket` | Provider | `semrel-plugin-bitbucket` | Active | [SemRels/provider-bitbucket](https://github.com/SemRels/provider-bitbucket) |
+| `conventional` | Analyzer | `semrel-plugin-conventional` | Active | [SemRels/analyzer-conventional](https://github.com/SemRels/analyzer-conventional) |
+| `default` | Analyzer | `semrel-plugin-default` | Active | [SemRels/analyzer-default](https://github.com/SemRels/analyzer-default) |
+| `github-actions` | Condition | `semrel-plugin-github-actions` | Active | [SemRels/condition-github-actions](https://github.com/SemRels/condition-github-actions) |
+| `generic` | Condition | `semrel-plugin-generic` | Active | [SemRels/condition-generic](https://github.com/SemRels/condition-generic) |
+| `gitea-actions` | Condition | `semrel-plugin-gitea-actions` | Active | [SemRels/condition-gitea-actions](https://github.com/SemRels/condition-gitea-actions) |
+| `gitlab-ci` | Condition | `semrel-plugin-gitlab-ci` | Active | [SemRels/condition-gitlab-ci](https://github.com/SemRels/condition-gitlab-ci) |
+| `slack` | Hook | `semrel-plugin-slack` | Active | [SemRels/hook-slack](https://github.com/SemRels/hook-slack) |
+| `email` | Hook | `semrel-plugin-email` | Active | [SemRels/hook-email](https://github.com/SemRels/hook-email) |
+| `matrix` | Hook | `semrel-plugin-matrix` | Active | [SemRels/hook-matrix](https://github.com/SemRels/hook-matrix) |
+| `jira` | Hook | `semrel-plugin-jira` | Active | [SemRels/hook-jira](https://github.com/SemRels/hook-jira) |
+| `gitplugin` | Hook | `semrel-plugin-gitplugin` | Active | [SemRels/hook-gitplugin](https://github.com/SemRels/hook-gitplugin) |
+| `go` | Updater | `semrel-plugin-go` | Active | [SemRels/updater-go](https://github.com/SemRels/updater-go) |
+| `npm` | Updater | `semrel-plugin-npm` | Active | [SemRels/updater-npm](https://github.com/SemRels/updater-npm) |
+| `docker` | Updater | `semrel-plugin-docker` | Active | [SemRels/updater-docker](https://github.com/SemRels/updater-docker) |
+| `gradle` | Updater | `semrel-plugin-gradle` | Active | [SemRels/updater-gradle](https://github.com/SemRels/updater-gradle) |
+| `python` | Updater | `semrel-plugin-python` | Active | [SemRels/updater-python](https://github.com/SemRels/updater-python) |
+| `helm` | Updater | `semrel-plugin-helm` | Active | [SemRels/updater-helm](https://github.com/SemRels/updater-helm) |
+| `cargo` | Updater | `semrel-plugin-cargo` | Active | [SemRels/updater-cargo](https://github.com/SemRels/updater-cargo) |
+| `maven` | Updater | `semrel-plugin-maven` | Active | [SemRels/updater-maven](https://github.com/SemRels/updater-maven) |
+| `nuget` | Updater | `semrel-plugin-nuget` | Active | [SemRels/updater-nuget](https://github.com/SemRels/updater-nuget) |
+| `homebrew` | Updater | `semrel-plugin-homebrew` | Active | [SemRels/updater-homebrew](https://github.com/SemRels/updater-homebrew) |
+| `terraform` | Updater | `semrel-plugin-terraform` | Active | [SemRels/updater-terraform](https://github.com/SemRels/updater-terraform) |
 
-### Updaters (Version Managers)
-- **updater-npm** - Update package.json versions
-- **updater-python** - Update Python package versions
-- **updater-gradle** - Update Gradle versions
-- **updater-docker** - Build and publish Docker images
-- **updater-go** - Update Go module versions
+## Discovery and installation
 
-### Hooks (Notifications)
-- **hook-slack** - Send Slack notifications
-- **hook-email** - Send email notifications (Phase 2)
+- Default install directory: `~/.semrel/plugins/`
+- Binary naming convention: `semrel-plugin-<name>`
+- Install command: `semrel plugin install <name>`
+- Search command: `semrel plugin search <query>`
+- List installed plugins: `semrel plugin list`
 
-## Plugin Status
-
-| Plugin | Status | Repository |
-|--------|--------|------------|
-| provider-github | Active | [SemRels/provider-github](https://github.com/SemRels/provider-github) |
-| provider-gitlab | Active | [SemRels/provider-gitlab](https://github.com/SemRels/provider-gitlab) |
-| provider-gitea | Active | [SemRels/provider-gitea](https://github.com/SemRels/provider-gitea) |
-| provider-git | Active | [SemRels/provider-git](https://github.com/SemRels/provider-git) |
-| condition-github-actions | Active | [SemRels/condition-github-actions](https://github.com/SemRels/condition-github-actions) |
-| condition-gitlab-ci | Active | [SemRels/condition-gitlab-ci](https://github.com/SemRels/condition-gitlab-ci) |
-| condition-gitea-actions | Active | [SemRels/condition-gitea-actions](https://github.com/SemRels/condition-gitea-actions) |
-| condition-generic | Active | [SemRels/condition-generic](https://github.com/SemRels/condition-generic) |
-| analyzer-conventional | Active | [SemRels/analyzer-conventional](https://github.com/SemRels/analyzer-conventional) |
-| analyzer-default | Active | [SemRels/analyzer-default](https://github.com/SemRels/analyzer-default) |
-| generator-changelog-md | Active | [SemRels/generator-changelog-md](https://github.com/SemRels/generator-changelog-md) |
-| generator-changelog-html | Active | [SemRels/generator-changelog-html](https://github.com/SemRels/generator-changelog-html) |
-| generator-release-notes | Active | [SemRels/generator-release-notes](https://github.com/SemRels/generator-release-notes) |
-| updater-npm | Active | [SemRels/updater-npm](https://github.com/SemRels/updater-npm) |
-| updater-python | Active | [SemRels/updater-python](https://github.com/SemRels/updater-python) |
-| updater-gradle | Active | [SemRels/updater-gradle](https://github.com/SemRels/updater-gradle) |
-| updater-docker | Active | [SemRels/updater-docker](https://github.com/SemRels/updater-docker) |
-| updater-go | Active | [SemRels/updater-go](https://github.com/SemRels/updater-go) |
-| hook-slack | Active | [SemRels/hook-slack](https://github.com/SemRels/hook-slack) |
-| hook-email | Coming Soon | [SemRels/hook-email](https://github.com/SemRels/hook-email) |
-
-## Registry
-
-All official plugins are published to the [Plugin Registry](/plugins/registry/).
-
-**Registry URL:** https://registry.semrel.io
-
-## Discovery
-
-Plugins are auto-discovered from:
-1. Registry: `https://registry.semrel.io/plugins.json`
-2. Local cache: `.semrel/plugins/`
-3. Direct installation (copy binary to `.semrel/plugins/`)
-
-See [Registry documentation](/plugins/registry/) for details.
+See the [Plugin Registry](/plugins/registry/) for registry metadata and installation details.
