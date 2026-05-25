@@ -3,73 +3,134 @@ title: CLI Reference
 description: Full reference for all semrel commands and flags.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-
-## Global flags
-
-These flags are available on every command:
-
-| Flag | Default | Description |
-|---|---|---|
-| `--config` | `.semrel.yaml` | Path to the configuration file |
-| `--dry-run` | `false` | Simulate the release without making any changes |
-| `--version` | — | Print the semrel version and exit |
-| `--help` | — | Show help for any command |
-
 ## `semrel release`
 
-Runs the full release pipeline:
-
-1. Loads plugins from `.semrel/`
-2. Verifies CI conditions (`CIConditionPlugin`)
-3. Fetches commits since the last release (`ProviderPlugin.GetCommitsSince`)
-4. Analyses commits and determines the version bump (`CommitAnalyzerPlugin`)
-5. Generates the changelog (`ChangelogGeneratorPlugin`)
-6. Updates version strings in tracked files (`FilesUpdaterPlugin`)
-7. Creates the git tag and platform release (`ProviderPlugin.CreateRelease`)
-8. Calls success / failure hooks (`HooksPlugin`)
+Runs the full release pipeline for the current repository.
 
 ```bash
-semrel release [flags]
+semrel release [--dry-run] [--config .semrel.yaml] [--force-bump-patch-version] [--edit]
 ```
 
-**Examples:**
+### What happens during `release`
+
+1. semrel loads `.semrel.yaml`.
+2. Configured plugins are resolved from `path:`, `~/.semrel/plugins/`, or `$PATH`.
+3. semrel builds the release context for the current branch, version, tag, bump, changelog, and dry-run state.
+4. Condition plugins validate whether the current environment is allowed to publish.
+5. semrel determines the current version, analyzes commits, and calculates the next version.
+6. Updater plugins can modify tracked files before the release is finalized.
+7. semrel creates the release artifacts unless `--dry-run` is enabled.
+8. Hook plugins run with the same release context after success or failure.
+
+### Flags
+
+| Flag | Description |
+| --- | --- |
+| `--dry-run` | Simulate the release without creating tags, releases, or other persistent changes |
+| `--config` | Read configuration from a non-default file |
+| `--force-bump-patch-version` | Force at least a patch bump even when the analyzer would not bump the version |
+| `--edit` | Let you edit generated release content before the release is finalized |
+
+### Examples
 
 ```bash
-# Preview what the release would do
+# Preview a release without making changes
 semrel release --dry-run
 
-# Use a non-default config location
-semrel release --config ./config/semrel.yaml
+# Use a non-default config file
+semrel release --config .github/semrel.yaml
 
-# Dry-run with a custom config
-semrel release --dry-run --config ./config/semrel.yaml
+# Force a patch bump
+semrel release --force-bump-patch-version
 ```
-
-<Aside type="note">
-  Full pipeline execution is under active development. See [issue #2](https://github.com/GoSemantics/semrel/issues/2) for progress.
-</Aside>
 
 ## `semrel lint`
 
-Validates commit messages since the last release against the configured rules. Useful as a pre-merge CI check.
+Validates the semrel configuration file.
 
 ```bash
-semrel lint [flags]
+semrel lint [--config .semrel.yaml]
 ```
 
-**Examples:**
+### Examples
 
 ```bash
-# Lint commits using the default config
+# Validate the default config
 semrel lint
 
-# Lint with a custom config
+# Validate a specific config file
 semrel lint --config ./config/semrel.yaml
 ```
 
-Exits with code `0` if all commits are valid, `1` otherwise. CI systems can use this to block merges of non-conformant commits.
+## `semrel commitlint`
 
-<Aside type="note">
-  Lint command is under active development. See [issue #47](https://github.com/GoSemantics/semrel/issues/47) for progress.
-</Aside>
+Validates commit messages and can emit either text or JSON output.
+
+```bash
+semrel commitlint [--output text|json]
+```
+
+### Examples
+
+```bash
+# Human-readable output
+semrel commitlint
+
+# Machine-readable output
+semrel commitlint --output json
+```
+
+## `semrel plugin list`
+
+Lists installed plugins.
+
+```bash
+semrel plugin list [--no-header]
+```
+
+### Examples
+
+```bash
+# List installed plugins
+semrel plugin list
+
+# List installed plugins without the table header
+semrel plugin list --no-header
+```
+
+## `semrel plugin search`
+
+Searches the registry for plugins.
+
+```bash
+semrel plugin search <query>
+```
+
+### Example
+
+```bash
+semrel plugin search github
+```
+
+## `semrel plugin install`
+
+Downloads a plugin into the default plugin directory or a custom directory.
+
+```bash
+semrel plugin install <name[@version]> [--plugin-dir <dir>]
+```
+
+### Examples
+
+```bash
+# Install the latest GitHub provider plugin
+semrel plugin install github
+
+# Install a specific plugin version
+semrel plugin install github@v0.1.0
+
+# Install into a custom directory
+semrel plugin install github --plugin-dir ./tools/plugins
+```
+
+Installed plugins use the `semrel-plugin-<name>` naming convention. By default, semrel stores them in `~/.semrel/plugins/`.
