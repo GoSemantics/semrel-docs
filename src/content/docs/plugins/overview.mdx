@@ -5,56 +5,77 @@ description: Understand how the semrel plugin system works and which plugin type
 
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
-semrel's release pipeline is entirely composed of plugins. Every capability — from fetching commits to sending Slack notifications — is provided by a plugin process that communicates with semrel over a local gRPC connection.
+semrel's release pipeline is composed of standalone plugin executables. Each plugin is discovered locally and executed as a subprocess — there is no gRPC layer and no `hashicorp/go-plugin` handshake.
 
 ## How plugins work
 
-1. semrel starts each plugin as a **child process** from your `.semrel/` directory.
-2. [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin) performs a handshake over the plugin's **stdout** — the plugin binary must never write anything else to stdout.
-3. All plugin logs must go to **stderr** (via `hclog` in Go).
-4. semrel connects over the negotiated gRPC socket and calls the appropriate RPCs in pipeline order.
-5. After the pipeline completes, semrel terminates all plugin processes.
+1. semrel reads each plugin entry from `.semrel.yaml`.
+2. The `uses:` value normally resolves to a binary named `semrel-plugin-<uses>`.
+3. semrel looks for that binary at an explicit `path:`, then in `~/.semrel/plugins/`, then in `$PATH`.
+4. Plugin `args:` values are exposed as environment variables in the form `SEMREL_PLUGIN_<KEY>=<value>`.
+5. Release context is also passed through environment variables so every plugin can read the same version, branch, tag, changelog, and dry-run state.
+6. semrel runs the executable and uses the process result to continue or stop the pipeline.
+
+## Release context environment
+
+These environment variables are available to plugin processes during execution.
+
+| Variable | Description |
+| --- | --- |
+| `SEMREL_VERSION` | The semrel CLI version |
+| `SEMREL_TAG_NAME` | Full tag name for the release |
+| `SEMREL_CURRENT_VERSION` | Current project version |
+| `SEMREL_NEXT_VERSION` | Next version selected for the release |
+| `SEMREL_BUMP` | Calculated bump level |
+| `SEMREL_BRANCH` | Current git branch |
+| `SEMREL_TAG_PREFIX` | Configured tag prefix |
+| `SEMREL_CHANGELOG` | Generated changelog content |
+| `SEMREL_DRY_RUN` | Whether the current run is a dry run |
 
 ## Plugin types
 
-The pipeline defines six plugin interfaces. A single binary can implement one or more of them.
+The current official plugin catalog is organized into five categories.
 
 <CardGrid>
   <Card title="Provider Plugin" icon="github">
-    Abstracts VCS platform operations: fetching the last release, listing commits since a ref, creating tags/releases, and uploading release assets.
+    Handles forge and git operations such as reading release history, creating tags, and publishing releases.
   </Card>
-  <Card title="CI Condition Plugin" icon="approve-check-circle">
-    Verifies that the current environment is authorised to publish a release (e.g. running on the correct branch in a trusted CI runner).
+  <Card title="Condition Plugin" icon="approve-check-circle">
+    Verifies that the current environment is allowed to publish a release.
   </Card>
-  <Card title="Commit Analyzer Plugin" icon="magnifier">
-    Parses the commit list and decides the required SemVer bump level: `NONE`, `PATCH`, `MINOR`, or `MAJOR`.
+  <Card title="Analyzer Plugin" icon="magnifier">
+    Inspects commits and decides the SemVer bump level.
   </Card>
-  <Card title="Changelog Generator Plugin" icon="document">
-    Renders release notes from the commit list. Returns Markdown, reStructuredText, or any other format your project uses.
+  <Card title="Updater Plugin" icon="pencil">
+    Updates versioned project files before the release is finalized.
   </Card>
-  <Card title="Files Updater Plugin" icon="pencil">
-    Writes the next version string into tracked project files (`Chart.yaml`, `package.json`, `go.mod`, etc.) before the release commit is created.
-  </Card>
-  <Card title="Hooks Plugin" icon="warning">
-    Lifecycle callbacks called after a successful release (`OnSuccess`) or when the pipeline fails (`OnFail`). Typically used for notifications.
+  <Card title="Hook Plugin" icon="warning">
+    Sends notifications or runs follow-up automation after success or failure.
   </Card>
 </CardGrid>
 
 ## Plugin discovery
 
-Discover plugins in the [Plugin Registry](/plugins/registry/).
+Discover official plugins in the [Plugin Registry](/plugins/registry/) or install them directly with `semrel plugin install <name>`.
 
-semrel looks for plugin binaries in the `.semrel/` directory at the repository root, or at the path specified by the `path` field in your config:
+semrel resolves plugins from the configured `uses:` value:
 
 ```yaml
 plugins:
-  - name: github          # loaded from .semrel/github
-  - name: my-notifier
-    path: ./tools/my-notifier  # explicit path
+  - uses: github
+    name: github-release
+    args:
+      owner: MyOrg
+      repo: my-repo
+
+  - uses: slack-notify
+    path: /usr/local/bin/semrel-plugin-slack
+    args:
+      webhook_url: ${{ env.SLACK_WEBHOOK }}
 ```
 
 <Aside type="tip">
-  Commit your `.semrel/` directory to version control so that your team and CI always use the same plugin versions. If a plugin is missing locally, semrel can also discover it through the [Plugin Registry](/plugins/registry/), download the matching binary, and verify its checksum before caching it.
+  `semrel plugin install github` downloads the plugin binary into `~/.semrel/plugins/`, where future runs can discover it automatically.
 </Aside>
 
 ## Plugin lifecycle
@@ -62,34 +83,21 @@ plugins:
 ```mermaid
 sequenceDiagram
     participant S as semrel
-    participant P as plugin
+    participant R as resolver
+    participant P as plugin executable
 
-    S->>P: spawn process
-    P-->>S: print port on stdout
-    S->>P: gRPC connect
-    S->>P: VerifyConditions()
-    P-->>S: ConditionsOK
-    S->>P: GetLastRelease()
-    P-->>S: SemanticVersion
-    S->>P: GetCommitsSince()
-    P-->>S: []Commit
-    S->>P: AnalyzeCommits()
-    P-->>S: BumpLevel
-    S->>P: GenerateNotes()
-    P-->>S: notes (Markdown)
-    S->>P: UpdateFiles()
-    P-->>S: []updatedFiles
-    S->>P: CreateRelease()
-    P-->>S: releaseURL
-    S->>P: OnSuccess()
-    P-->>S: ok
-    S->>P: terminate
+    S->>R: resolve uses: github
+    R-->>S: path / ~/.semrel/plugins / $PATH
+    S->>P: spawn subprocess
+    Note over S,P: SEMREL_PLUGIN_* and SEMREL_* env vars
+    P->>P: perform plugin work
+    P-->>S: process output + exit status
+    S->>S: continue pipeline or stop on failure
 ```
 
 ## Next steps
 
+- [Official Plugins](/plugins/)
 - [Plugin Registry](/plugins/registry/)
 - [Plugin Publishing Guide](/plugins/publishing/)
 - [Plugin SDK — writing your first plugin](/plugins/sdk/)
-- [Example plugins](/plugins/examples/)
-- [gRPC API reference](/api/grpc/)
