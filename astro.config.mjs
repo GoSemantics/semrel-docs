@@ -30,7 +30,14 @@ export default defineConfig({
         },
         {
           label: 'Plugins',
-          items: [{ autogenerate: { directory: 'plugins' } }],
+          items: [
+            { label: 'Official Plugins', link: '/plugins/' },
+            { label: 'Registry', link: '/plugins/registry/' },
+            { label: 'Publishing', link: '/plugins/publishing/' },
+            { label: 'Development', link: '/plugins/sdk/' },
+            { label: 'Overview', link: '/plugins/overview/' },
+            { label: 'Examples', link: '/plugins/examples/' },
+          ],
         },
         {
           label: 'Governance',
