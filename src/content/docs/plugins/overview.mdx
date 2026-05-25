@@ -5,7 +5,7 @@ description: Understand how the semrel plugin system works and which plugin type
 
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
-semrel's release pipeline is composed of standalone plugin executables. Each plugin is discovered locally and executed as a subprocess — there is no gRPC layer and no `hashicorp/go-plugin` handshake.
+semrel's release pipeline is composed of standalone plugin executables. Each plugin is discovered locally and executed as a subprocess — there is no gRPC layer or RPC handshake.
 
 ## How plugins work
 
