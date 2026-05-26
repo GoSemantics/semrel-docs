@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: analyzer-default"
 description: Determines the next SemVer bump by matching commit messages against regular expressions.
 ---
-
-# Plugin: analyzer-default
 
 Determines the next SemVer bump by matching commit messages against regular expressions. Choose it when you want custom versioning rules without adopting Conventional Commits.
 

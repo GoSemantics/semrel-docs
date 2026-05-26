@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-nuget"
 description: Updates the version property inside a `.csproj` or other NuGet project file.
 ---
-
-# Plugin: updater-nuget
 
 Updates the version property inside a `.csproj` or other NuGet project file. It helps keep .NET package metadata in sync with SemRel releases.
 

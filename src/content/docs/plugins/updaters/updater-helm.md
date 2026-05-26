@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-helm"
 description: Updates chart metadata in a Helm `Chart.yaml` file.
 ---
-
-# Plugin: updater-helm
 
 Updates chart metadata in a Helm `Chart.yaml` file. It helps keep Helm chart packages aligned with the application version being released.
 

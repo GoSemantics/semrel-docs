@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: generator-changelog-html"
 description: Generates an HTML changelog for the pending release.
 ---
-
-# Plugin: generator-changelog-html
 
 Generates an HTML changelog for the pending release. It is useful for release portals, static sites, and emails that need richly formatted output.
 
@@ -33,7 +31,7 @@ plugins:
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
 | `SEMREL_PLUGIN_TEMPLATE` | no | `built-in template` | Path to a Go template used to render the changelog. |
-| `SEMREL_PLUGIN_CSS_FILE` | no | `—` | Optional CSS file to embed or reference in the HTML output. |
+| `SEMREL_PLUGIN_CSS_FILE` | no | `â€”` | Optional CSS file to embed or reference in the HTML output. |
 | `SEMREL_PLUGIN_MAX_COMMITS` | no | `100` | Maximum number of commits to include. |
 
 ## Release Context Variables

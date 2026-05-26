@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-gradle"
 description: Updates the version key in a Gradle properties file.
 ---
-
-# Plugin: updater-gradle
 
 Updates the version key in a Gradle properties file. Use it to keep Java or Kotlin projects on the release version selected by SemRel.
 

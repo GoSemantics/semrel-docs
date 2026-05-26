@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: condition-gitlab-ci"
 description: Confirms the current release is running inside GitLab CI.
 ---
-
-# Plugin: condition-gitlab-ci
 
 Confirms the current release is running inside GitLab CI. It is a simple safeguard for teams that only trust GitLab-managed pipelines to publish versions.
 
@@ -28,7 +26,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| _None_ | no | — | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
+| _None_ | no | â€” | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
 
 ## Release Context Variables
 

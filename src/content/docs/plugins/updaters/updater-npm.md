@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-npm"
 description: Updates the version field in a `package.json` file.
 ---
-
-# Plugin: updater-npm
 
 Updates the version field in a `package.json` file. Use it to keep Node.js packages aligned with the version selected by SemRel.
 

@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: condition-gitea-actions"
 description: Confirms the current release is running inside Gitea Actions.
 ---
-
-# Plugin: condition-gitea-actions
 
 Confirms the current release is running inside Gitea Actions. Use it to block local or foreign CI runs from publishing official releases.
 
@@ -28,7 +26,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| _None_ | no | — | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
+| _None_ | no | â€” | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
 
 ## Release Context Variables
 

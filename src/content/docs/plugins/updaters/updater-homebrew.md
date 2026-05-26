@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-homebrew"
 description: Updates a Homebrew formula with the new release URL and checksum.
 ---
-
-# Plugin: updater-homebrew
 
 Updates a Homebrew formula with the new release URL and checksum. Use it when SemRel publishes tarballs that also need to be reflected in a Homebrew tap.
 
@@ -32,9 +30,9 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_FORMULA_FILE` | yes | `—` | Homebrew formula file to update. |
+| `SEMREL_PLUGIN_FORMULA_FILE` | yes | `â€”` | Homebrew formula file to update. |
 | `SEMREL_PLUGIN_URL_TEMPLATE` | no | `plugin-defined` | Template used to build the download URL for the new release. |
-| `SEMREL_PLUGIN_SHA256` | no | `—` | Checksum to write into the formula. |
+| `SEMREL_PLUGIN_SHA256` | no | `â€”` | Checksum to write into the formula. |
 
 ## Release Context Variables
 

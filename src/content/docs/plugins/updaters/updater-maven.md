@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-maven"
 description: Updates the version declared in a Maven `pom.xml` file.
 ---
-
-# Plugin: updater-maven
 
 Updates the version declared in a Maven `pom.xml` file. It is useful for Java projects that keep their canonical version in Maven metadata.
 

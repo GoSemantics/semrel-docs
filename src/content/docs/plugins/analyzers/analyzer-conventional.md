@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: analyzer-conventional"
 description: Determines the next SemVer bump from Conventional Commit messages.
 ---
-
-# Plugin: analyzer-conventional
 
 Determines the next SemVer bump from Conventional Commit messages. It maps commit types and breaking-change markers to `major`, `minor`, or `patch` decisions.
 

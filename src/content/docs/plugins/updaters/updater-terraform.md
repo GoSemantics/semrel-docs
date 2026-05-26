@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-terraform"
 description: Updates a Terraform variable that stores the application version.
 ---
-
-# Plugin: updater-terraform
 
 Updates a Terraform variable that stores the application version. It is useful when Terraform modules or deployments need the new release version written into configuration.
 

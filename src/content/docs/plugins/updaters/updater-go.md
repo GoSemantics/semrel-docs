@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-go"
 description: Updates a Go source file that exposes the project version.
 ---
-
-# Plugin: updater-go
 
 Updates a Go source file that exposes the project version. It is typically used to keep a `version.go` constant in sync with the SemRel release version.
 

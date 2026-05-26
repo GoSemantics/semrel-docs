@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-python"
 description: Updates Python package version metadata in `pyproject.toml` or a similar backend file.
 ---
-
-# Plugin: updater-python
 
 Updates Python package version metadata in `pyproject.toml` or a similar backend file. Choose it when your Python release process needs the application version written before packaging or publishing.
 

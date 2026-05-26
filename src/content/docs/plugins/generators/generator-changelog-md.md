@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: generator-changelog-md"
 description: Generates a Markdown changelog for the pending release.
 ---
-
-# Plugin: generator-changelog-md
 
 Generates a Markdown changelog for the pending release. Use it when you want changelog output that can be committed, published, or reused by provider plugins.
 

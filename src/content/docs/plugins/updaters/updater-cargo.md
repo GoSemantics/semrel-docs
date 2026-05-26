@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-cargo"
 description: Updates the version field in a Rust Cargo manifest.
 ---
-
-# Plugin: updater-cargo
 
 Updates the version field in a Rust Cargo manifest. Use it to keep `Cargo.toml` aligned with the SemRel version chosen for the release.
 

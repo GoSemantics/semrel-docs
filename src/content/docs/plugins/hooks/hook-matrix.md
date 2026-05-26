@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: hook-matrix"
 description: Posts release notifications to a Matrix room.
 ---
-
-# Plugin: hook-matrix
 
 Posts release notifications to a Matrix room. It works well for teams using Matrix or Element for release coordination and status updates.
 
@@ -33,9 +31,9 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_HOMESERVER` | yes | `—` | Matrix homeserver base URL. |
-| `SEMREL_PLUGIN_TOKEN` | yes | `—` | Access token used to send messages. |
-| `SEMREL_PLUGIN_ROOM_ID` | yes | `—` | Destination room ID, such as `!room:server`. |
+| `SEMREL_PLUGIN_HOMESERVER` | yes | `â€”` | Matrix homeserver base URL. |
+| `SEMREL_PLUGIN_TOKEN` | yes | `â€”` | Access token used to send messages. |
+| `SEMREL_PLUGIN_ROOM_ID` | yes | `â€”` | Destination room ID, such as `!room:server`. |
 | `SEMREL_PLUGIN_MESSAGE_TEMPLATE` | no | `plugin-defined` | Optional Matrix message template. |
 
 ## Release Context Variables

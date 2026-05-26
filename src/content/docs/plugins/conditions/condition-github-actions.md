@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: condition-github-actions"
 description: Confirms the current release is running inside GitHub Actions.
 ---
-
-# Plugin: condition-github-actions
 
 Confirms the current release is running inside GitHub Actions. It is useful when you want releases to happen only from your GitHub-hosted CI pipeline.
 
@@ -28,7 +26,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| _None_ | no | — | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
+| _None_ | no | â€” | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
 
 ## Release Context Variables
 

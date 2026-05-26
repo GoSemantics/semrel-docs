@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: generator-release-notes"
 description: Builds concise release notes from the current release context and commit history.
 ---
-
-# Plugin: generator-release-notes
 
 Builds concise release notes from the current release context and commit history. It is a good fit for provider plugins that publish release descriptions to Git forges.
 

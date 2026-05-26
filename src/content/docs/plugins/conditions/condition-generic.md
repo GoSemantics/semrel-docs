@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: condition-generic"
 description: Runs a shell command and only passes when that command exits with status 0.
 ---
-
-# Plugin: condition-generic
 
 Runs a shell command and only passes when that command exits with status 0. Use it to gate releases on custom branch checks, repository state, or external validation logic.
 
@@ -30,7 +28,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_COMMAND` | yes | `—` | Shell command that must exit with status 0 for the condition to pass. |
+| `SEMREL_PLUGIN_COMMAND` | yes | `â€”` | Shell command that must exit with status 0 for the condition to pass. |
 
 ## Release Context Variables
 

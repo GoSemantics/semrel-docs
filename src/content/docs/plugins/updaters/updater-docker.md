@@ -1,9 +1,7 @@
----
+﻿---
 title: "Plugin: updater-docker"
 description: Updates a version argument inside a Dockerfile.
 ---
-
-# Plugin: updater-docker
 
 Updates a version argument inside a Dockerfile. It is useful when your container build embeds the application version through a build argument.
 
