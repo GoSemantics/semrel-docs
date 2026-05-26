@@ -1,0 +1,55 @@
+---
+title: "Plugin: condition-generic"
+description: Runs a shell command and only passes when that command exits with status 0.
+---
+
+# Plugin: condition-generic
+
+Runs a shell command and only passes when that command exits with status 0. Use it to gate releases on custom branch checks, repository state, or external validation logic.
+
+## Installation
+
+```bash
+go install github.com/SemRels/condition-generic@latest
+```
+
+Each plugin is a standalone Go binary. Keep it on your `PATH` or reference it with `path:` in `.semrel.yaml`. If you keep secrets in a `.env` file, load them with `semrel --env-file .env release`.
+
+## Configuration
+
+```yaml
+version: 1
+plugins:
+  - name: condition-generic
+    path: condition-generic
+    args:
+      command: 'test "$SEMREL_BRANCH" = "main"'
+```
+
+## Environment Variables
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `SEMREL_PLUGIN_COMMAND` | yes | `—` | Shell command that must exit with status 0 for the condition to pass. |
+
+## Release Context Variables
+
+The plugin itself only reads `SEMREL_PLUGIN_COMMAND`, but the command it executes inherits the full SemRel release context:
+
+- `SEMREL_VERSION`
+- `SEMREL_TAG_NAME`
+- `SEMREL_NEXT_VERSION`
+- `SEMREL_CURRENT_VERSION`
+- `SEMREL_BUMP`
+- `SEMREL_BRANCH`
+- `SEMREL_TAG_PREFIX`
+- `SEMREL_CHANGELOG`
+- `SEMREL_DRY_RUN`
+
+## Behavior
+
+With `command: 'test "$SEMREL_BRANCH" = "main"'`, the plugin exits `0` on `main` and exits non-zero on every other branch.
+
+## Source
+
+- [SemRels/condition-generic](https://github.com/SemRels/condition-generic)

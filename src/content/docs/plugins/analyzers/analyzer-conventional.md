@@ -1,0 +1,49 @@
+---
+title: "Plugin: analyzer-conventional"
+description: Determines the next SemVer bump from Conventional Commit messages.
+---
+
+# Plugin: analyzer-conventional
+
+Determines the next SemVer bump from Conventional Commit messages. It maps commit types and breaking-change markers to `major`, `minor`, or `patch` decisions.
+
+## Installation
+
+```bash
+go install github.com/SemRels/analyzer-conventional@latest
+```
+
+Each plugin is a standalone Go binary. Keep it on your `PATH` or reference it with `path:` in `.semrel.yaml`. If you keep secrets in a `.env` file, load them with `semrel --env-file .env release`.
+
+## Configuration
+
+```yaml
+version: 1
+plugins:
+  - name: analyzer-conventional
+    path: analyzer-conventional
+    args:
+      breaking_change_label: 'BREAKING CHANGE'
+      minor_types: feat
+      patch_types: 'fix,perf,refactor'
+```
+
+## Environment Variables
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `SEMREL_PLUGIN_BREAKING_CHANGE_LABEL` | no | `BREAKING CHANGE` | Footer label used to detect breaking changes. |
+| `SEMREL_PLUGIN_MINOR_TYPES` | no | `feat` | Comma-separated commit types that trigger a minor bump. |
+| `SEMREL_PLUGIN_PATCH_TYPES` | no | `fix,perf,refactor` | Comma-separated commit types that trigger a patch bump. |
+
+## Release Context Variables
+
+This plugin does not require any of the shared `SEMREL_*` release context variables to do its job.
+
+## Behavior
+
+Given the commits `feat(api): add search endpoint` and `fix(ui): handle empty state`, the analyzer returns a `minor` bump because `feat` outranks `fix`.
+
+## Source
+
+- [SemRels/analyzer-conventional](https://github.com/SemRels/analyzer-conventional)
