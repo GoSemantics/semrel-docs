@@ -35,16 +35,23 @@ Manual versioning is error-prone and slow. semrel removes the guesswork:
 
 ## How it works
 
-```
- git log  ──►  Analyzer  ──►  next SemVer
-                               │
-                         generated changelog
-                               │
-                      Updaters (optional)
-                               │
-                     Provider (tag / release)
-                               │
-                         Hooks (notify)
+```mermaid
+flowchart TD
+    A([🔍 git log]) --> B[Condition\nPlugin]
+    B -->|allowed| C[Analyzer\nPlugin]
+    C --> D{SemVer\nBump?}
+    D -->|none| E([⏹ No release])
+    D -->|patch / minor / major| F[Generator\nPlugin]
+    F --> G[next version\n+ changelog]
+    G --> H[Updater Plugins\noptional]
+    H --> I[Provider Plugin\ntag · release · assets]
+    I --> J[Hook Plugins\nnotify · follow-up]
+    J --> K([✅ Release done])
+
+    style A fill:#4c8ef7,color:#fff,stroke:none
+    style E fill:#999,color:#fff,stroke:none
+    style K fill:#2dba4e,color:#fff,stroke:none
+    style D fill:#f0a500,color:#fff,stroke:none
 ```
 
 Each stage can be handled by a separate plugin executable. Install official plugins with commands such as `semrel plugin install github`, then configure them in `.semrel.yaml`.
