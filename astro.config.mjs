@@ -16,6 +16,11 @@ export default defineConfig({
     starlight({
       title: 'semrel',
       description: 'Semantic Versioning for Go',
+      logo: {
+        src: './public/semrel.svg',
+        alt: 'semrel logo',
+      },
+      favicon: '/semrel.png',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/GoSemantics/semrel' },
       ],
@@ -50,6 +55,7 @@ export default defineConfig({
                 { label: 'hook-jira', link: '/plugins/hooks/hook-jira/' },
                 { label: 'hook-matrix', link: '/plugins/hooks/hook-matrix/' },
                 { label: 'hook-slack', link: '/plugins/hooks/hook-slack/' },
+                { label: 'hook-teams', link: '/plugins/hooks/hook-teams/' },
               ],
             },
             {
