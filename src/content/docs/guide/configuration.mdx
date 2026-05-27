@@ -220,11 +220,34 @@ An ordered list of plugins to load for the release pipeline.
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `uses` | string | yes* | Plugin type or install name. semrel resolves to `semrel-plugin-<uses>` |
-| `name` | string | no | Optional instance identifier for this plugin entry |
+| `name` | string | no | Optional instance identifier (useful when the same plugin appears multiple times) |
 | `path` | string | no | Explicit path to a plugin binary (overrides `uses` resolution) |
 | `args` | map | no | Arbitrary key-value pairs passed to the plugin as `SEMREL_PLUGIN_*` environment variables |
+| `phase` | string | no | When to run: `condition` (before any git work) or `release` (after tag created, default) |
 
 *Either `uses` or `path` must be set.
+
+### Plugin phases
+
+The `phase` field controls *when* in the release pipeline the plugin runs:
+
+| Phase | When it runs | Typical use |
+| --- | --- | --- |
+| `condition` | After config load, **before** any commit analysis or tag creation | `condition-github-actions`, `condition-gitlab-ci` — abort if environment is wrong |
+| `release` | After the tag is created (default) | `provider-github`, `hook-slack`, `updater-npm` — publish and notify |
+
+```yaml
+plugins:
+  # Gate: abort if not running in GitHub Actions
+  - uses: condition-github-actions
+    phase: condition
+
+  # Post-release: create GitHub release with changelog body
+  - uses: provider-github
+    phase: release   # this is the default, can be omitted
+    args:
+      token: ${{ env.GITHUB_TOKEN }}
+```
 
 ### Plugin resolution
 
