@@ -43,15 +43,17 @@ flowchart TD
     D -->|none| E([⏹ No release])
     D -->|patch / minor / major| F[Generator\nPlugin]
     F --> G[next version\n+ changelog]
-    G --> H[Updater Plugins\noptional]
-    H --> I[Provider Plugin\ntag · release · assets]
-    I --> J[Hook Plugins\nnotify · follow-up]
-    J --> K([✅ Release done])
+    G --> H[pre-tag Plugins\ne.g. updater-go]
+    H --> I[🏷️ git tag]
+    I --> J[Provider Plugin\ntag · release · assets]
+    J --> K[Hook Plugins\nnotify · follow-up]
+    K --> L([✅ Release done])
 
     style A fill:#4c8ef7,color:#fff,stroke:none
     style E fill:#999,color:#fff,stroke:none
-    style K fill:#2dba4e,color:#fff,stroke:none
+    style L fill:#2dba4e,color:#fff,stroke:none
     style D fill:#f0a500,color:#fff,stroke:none
+    style I fill:#6e40c9,color:#fff,stroke:none
 ```
 
 Each stage can be handled by a separate plugin executable. Install official plugins with commands such as `semrel plugin install github`, then configure them in `.semrel.yaml`.
