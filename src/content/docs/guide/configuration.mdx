@@ -5,14 +5,46 @@ description: All .semrel.yaml configuration options explained.
 
 import { Aside } from '@astrojs/starlight/components';
 
-All semrel behavior is controlled by a single YAML file, `.semrel.yaml`, in the root of your repository. You can specify a different path with `--config`.
+All semrel behavior is controlled by a single config file in the root of your repository. You can specify a different path with `--config`.
+
+## Supported formats
+
+semrel auto-discovers the config file in this order:
+
+| File | Format |
+| --- | --- |
+| `.semrel.yaml` / `.semrel.yml` | YAML |
+| `.semrel.toml` | TOML |
+| `.semrel.json` | JSON |
+
+The examples on this page use YAML. TOML and JSON use `snake_case` keys (e.g. `tag_prefix` instead of `tagPrefix`).
 
 ## Full example
 
 ```yaml
 version: 1
+tagPrefix: v
+
 branches:
   - name: main
+  - name: "*.x"
+    maintenance: true
+  - name: next
+    prerelease: beta
+
+rules:
+  - type: feat
+    bump: minor
+  - type: fix
+    bump: patch
+  - type: perf
+    bump: patch
+  - type: revert
+    bump: patch
+
+version_ceiling: "1.0.0"
+ceiling_strategy: clamp
+
 plugins:
   - uses: github
     name: github-release
@@ -30,6 +62,84 @@ plugins:
 ## `version`
 
 The config schema version. Always set this to `1`.
+
+## `tagPrefix`
+
+The prefix prepended to the version number when creating git tags.
+
+```yaml
+tagPrefix: v   # creates tags like v1.2.3 (default)
+tagPrefix: ""  # creates tags like 1.2.3
+```
+
+| Value | Default | Description |
+| --- | --- | --- |
+| any string | `v` | Prepended to every tag semrel creates |
+
+## `branches`
+
+A list of branches from which releases can be made. Commits on unlisted branches are ignored.
+
+```yaml
+branches:
+  - name: main
+  - name: "*.x"
+    maintenance: true
+  - name: next
+    prerelease: beta
+```
+
+### Branch fields
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string | — | Branch name or glob pattern (e.g. `main`, `"*.x"`, `release/*`) |
+| `prerelease` | string | — | Pre-release identifier appended to the version (e.g. `beta` → `1.0.0-beta.1`) |
+| `maintenance` | bool | `false` | Restricts this branch to patch-only bumps. Also auto-detected from `N.x` / `N.M.x` patterns |
+
+<Aside type="tip">
+  Maintenance branches like `1.x` or `2.3.x` are auto-detected — you don't need to set `maintenance: true` explicitly for name patterns that match `N.x` or `N.M.x`.
+</Aside>
+
+## `rules`
+
+Maps conventional commit types to semver bump levels. If omitted, semrel uses the built-in defaults.
+
+```yaml
+rules:
+  - type: feat
+    bump: minor
+  - type: fix
+    bump: patch
+  - type: perf
+    bump: patch
+  - type: revert
+    bump: patch
+```
+
+### Rule fields
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `type` | string | yes | Conventional commit type (e.g. `feat`, `fix`, `perf`) |
+| `bump` | string | yes | One of `major`, `minor`, `patch` |
+
+<Aside type="note">
+  Breaking changes (`BREAKING CHANGE` footer or `!` suffix like `feat!:`) always result in a `major` bump regardless of rules.
+</Aside>
+
+### Default rules
+
+When `rules:` is absent, semrel uses:
+
+| Type | Bump |
+| --- | --- |
+| `feat` | `minor` |
+| `fix` | `patch` |
+| `perf` | `patch` |
+| `revert` | `patch` |
+
+Commit types not listed in `rules` produce no release.
 
 ## `version_ceiling`
 
@@ -67,27 +177,18 @@ ceiling_strategy: clamp   # clamp (default) | skip | error
 
 To promote past the ceiling, remove or raise `version_ceiling` in `.semrel.yaml` and commit.
 
-## `branches`
-
-A list of branches from which releases can be made.
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `name` | string | — | Branch name or glob pattern |
-| `prerelease` | bool | `false` | When `true`, releases from this branch get a pre-release suffix |
-
-Only commits landing on a listed branch trigger a release.
-
 ## `plugins`
 
 An ordered list of plugins to load for the release pipeline.
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `uses` | string | yes | Plugin type or install name. By default semrel resolves this to `semrel-plugin-<uses>` |
+| `uses` | string | yes* | Plugin type or install name. semrel resolves to `semrel-plugin-<uses>` |
 | `name` | string | no | Optional instance identifier for this plugin entry |
-| `path` | string | no | Explicit path to a plugin binary |
+| `path` | string | no | Explicit path to a plugin binary (overrides `uses` resolution) |
 | `args` | map | no | Arbitrary key-value pairs passed to the plugin as `SEMREL_PLUGIN_*` environment variables |
+
+*Either `uses` or `path` must be set.
 
 ### Plugin resolution
 
