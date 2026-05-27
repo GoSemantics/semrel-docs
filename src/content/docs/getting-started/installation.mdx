@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to install semrel on Linux, macOS, and Windows.
+description: How to install semrel on Linux, macOS, Windows — and via Docker in CI/CD.
 ---
 
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
@@ -13,27 +13,42 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 ## Install
 
 <Tabs>
+  <TabItem label="Docker (recommended)">
+    No installation needed. Pull the official image and run:
+
+    ```bash
+    docker pull ghcr.io/semrels/semrel:latest-alpine
+    docker run --rm \
+      -v "$(pwd):/workspace" -w /workspace \
+      -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+      ghcr.io/semrels/semrel:latest-alpine release --dry-run
+    ```
+
+    The **alpine** variant bundles `git` and `ca-certificates` — everything semrel needs.
+    See [Docker guide](/guide/docker/) for image variants and version pinning.
+  </TabItem>
   <TabItem label="go install">
     ```bash
-    go install github.com/GoSemantics/semrel/cmd/semrel@latest
+    go install github.com/SemRels/semrel/cmd/semrel@latest
     ```
     Requires Go ≥ 1.22. The binary is placed in `$GOPATH/bin` (usually `~/go/bin`).
   </TabItem>
   <TabItem label="Binary download">
-    Download the pre-built binary for your platform from [GitHub Releases](https://github.com/GoSemantics/semrel/releases) and place it somewhere on your `$PATH`:
+    Download the pre-built binary for your platform from [GitHub Releases](https://github.com/SemRels/semrel/releases) and place it somewhere on your `$PATH`:
 
     ```bash
-    # Linux / macOS (example for v0.1.0, amd64)
-    curl -L https://github.com/GoSemantics/semrel/releases/download/v0.1.0/semrel_linux_amd64 \
-      -o /usr/local/bin/semrel
+    # Linux / macOS (example for v0.2.0, amd64)
+    curl -L https://github.com/SemRels/semrel/releases/download/v0.2.0/semrel_0.2.0_linux_amd64.tar.gz \
+      | tar xz semrel
+    mv semrel /usr/local/bin/
     chmod +x /usr/local/bin/semrel
     ```
   </TabItem>
   <TabItem label="From source">
     ```bash
-    git clone https://github.com/GoSemantics/semrel.git
+    git clone https://github.com/SemRels/semrel.git
     cd semrel
-    go build -o semrel ./cmd/go-semrel
+    go build -o semrel ./cmd/semrel
     mv semrel /usr/local/bin/
     ```
   </TabItem>
@@ -47,11 +62,151 @@ semrel --version
 
 Expected output:
 ```
-semrel version v0.1.0
+semrel version v0.2.0
 ```
 
-<Aside type="note">
-  semrel is still in early development. Binary releases may not yet be available for all platforms. Using `go install` is the most reliable installation method right now.
+## CI / CD
+
+<Tabs>
+  <TabItem label="GitHub Actions (Docker)">
+    The simplest approach — use semrel as a Docker container action.
+    No Go toolchain required, just a checkout and the semrel step:
+
+    ```yaml
+    # .github/workflows/release.yml
+    name: Release
+
+    on:
+      push:
+        branches: [main]
+
+    permissions:
+      contents: write
+
+    jobs:
+      release:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+
+          - name: Run semrel
+            uses: docker://ghcr.io/semrels/semrel:latest-alpine
+            with:
+              args: release
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    ```
+
+    Or run semrel in a **container job** (useful when subsequent steps also need it):
+
+    ```yaml
+    jobs:
+      release:
+        runs-on: ubuntu-latest
+        container:
+          image: ghcr.io/semrels/semrel:latest-alpine
+        steps:
+          - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+
+          - name: Run semrel
+            run: semrel release
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    ```
+  </TabItem>
+  <TabItem label="GitLab CI (Docker)">
+    Set the semrel image on your release job — GitLab CI runs it as the container:
+
+    ```yaml
+    # .gitlab-ci.yml
+    semrel:
+      image: ghcr.io/semrels/semrel:latest-alpine
+      stage: release
+      rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+      script:
+        - semrel release --gitlab-dotenv semrel.env
+      artifacts:
+        reports:
+          dotenv: semrel.env
+    ```
+
+    The `dotenv` artifact exposes `SEMREL_VERSION`, `SEMREL_TAG`, and `SEMREL_CHANGELOG` to downstream jobs automatically.
+    See [CI Outputs guide](/guide/ci-outputs/) for details.
+  </TabItem>
+  <TabItem label="GitHub Actions (go install)">
+    Install semrel via Go toolchain if you prefer a non-Docker setup:
+
+    ```yaml
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Install semrel
+      run: go install github.com/SemRels/semrel/cmd/semrel@latest
+
+    - name: Run semrel
+      run: semrel release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    ```
+  </TabItem>
+  <TabItem label="CircleCI">
+    Use the alpine image as the executor:
+
+    ```yaml
+    # .circleci/config.yml
+    version: 2.1
+    jobs:
+      release:
+        docker:
+          - image: ghcr.io/semrels/semrel:latest-alpine
+        steps:
+          - checkout
+          - run:
+              name: Run semrel
+              command: semrel release
+    workflows:
+      release:
+        jobs:
+          - release:
+              filters:
+                branches:
+                  only: main
+    ```
+  </TabItem>
+  <TabItem label="Jenkins">
+    Use the alpine image in a declarative pipeline:
+
+    ```groovy
+    // Jenkinsfile
+    pipeline {
+      agent {
+        docker {
+          image 'ghcr.io/semrels/semrel:latest-alpine'
+          args  '-v $HOME/.gitconfig:/root/.gitconfig:ro'
+        }
+      }
+      stages {
+        stage('Release') {
+          when { branch 'main' }
+          steps {
+            sh 'semrel release'
+          }
+        }
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="tip">
+  **Pin your image version in production.** Use `ghcr.io/semrels/semrel:0.2.0-alpine` instead of `latest` to ensure reproducible releases.
+  See the [Docker guide](/guide/docker/) for all available tags.
 </Aside>
 
 ## Installing plugins from the registry
@@ -76,20 +231,6 @@ export SEMREL_CACHE_TTL=24h
 ```
 
 For more detail, see the [Plugin Registry overview](/plugins/registry/) and the [Plugin Publishing Guide](/plugins/publishing/).
-
-## CI / CD
-
-For GitHub Actions, add a setup step before calling `semrel release`:
-
-```yaml
-- name: Set up Go
-  uses: actions/setup-go@v5
-  with:
-    go-version: '1.22'
-
-- name: Install semrel
-  run: go install github.com/GoSemantics/semrel/cmd/semrel@latest
-```
 
 ## Shell completion
 
