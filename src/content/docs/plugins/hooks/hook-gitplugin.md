@@ -30,9 +30,9 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_REPO` | yes | `â€”` | Git repository URL or path to update. |
+| `SEMREL_PLUGIN_REPO` | yes | `—` | Git repository URL or path to update. |
 | `SEMREL_PLUGIN_BRANCH` | no | `main` | Target branch to push. |
-| `SEMREL_PLUGIN_TOKEN` | no | `â€”` | Optional token for authenticated pushes. |
+| `SEMREL_PLUGIN_TOKEN` | no | `—` | Optional token for authenticated pushes. |
 
 ## Release Context Variables
 

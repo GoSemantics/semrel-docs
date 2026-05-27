@@ -31,7 +31,7 @@ plugins:
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
 | `SEMREL_PLUGIN_REMOTE` | no | `origin` | Remote name used for push operations. |
-| `SEMREL_PLUGIN_SIGNING_KEY` | no | `â€”` | Optional signing key for annotated or signed tags. |
+| `SEMREL_PLUGIN_SIGNING_KEY` | no | `—` | Optional signing key for annotated or signed tags. |
 | `SEMREL_PLUGIN_PUSH_BRANCH` | no | `false` | Push the current branch in addition to the tag. |
 
 ## Release Context Variables

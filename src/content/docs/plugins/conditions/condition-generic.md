@@ -28,7 +28,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_COMMAND` | yes | `â€”` | Shell command that must exit with status 0 for the condition to pass. |
+| `SEMREL_PLUGIN_COMMAND` | yes | `—` | Shell command that must exit with status 0 for the condition to pass. |
 
 ## Release Context Variables
 

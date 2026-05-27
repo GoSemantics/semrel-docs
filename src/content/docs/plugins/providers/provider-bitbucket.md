@@ -31,10 +31,10 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_WORKSPACE` | yes | `â€”` | Bitbucket workspace name. |
+| `SEMREL_PLUGIN_WORKSPACE` | yes | `—` | Bitbucket workspace name. |
 | `SEMREL_PLUGIN_REPO` | no | `current repository` | Repository slug to publish into. |
-| `SEMREL_PLUGIN_APP_PASSWORD` | yes | `â€”` | Bitbucket app password. |
-| `SEMREL_PLUGIN_USERNAME` | yes | `â€”` | Bitbucket username. |
+| `SEMREL_PLUGIN_APP_PASSWORD` | yes | `—` | Bitbucket app password. |
+| `SEMREL_PLUGIN_USERNAME` | yes | `—` | Bitbucket username. |
 
 ## Release Context Variables
 

@@ -31,9 +31,9 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_BASE_URL` | yes | `â€”` | Base URL for the Jira instance. |
-| `SEMREL_PLUGIN_TOKEN` | yes | `â€”` | API token for Jira authentication. |
-| `SEMREL_PLUGIN_PROJECT` | yes | `â€”` | Jira project key. |
+| `SEMREL_PLUGIN_BASE_URL` | yes | `—` | Base URL for the Jira instance. |
+| `SEMREL_PLUGIN_TOKEN` | yes | `—` | API token for Jira authentication. |
+| `SEMREL_PLUGIN_PROJECT` | yes | `—` | Jira project key. |
 | `SEMREL_PLUGIN_FIX_VERSION_TEMPLATE` | no | `plugin-defined` | Template used to name the Jira fix version. |
 
 ## Release Context Variables

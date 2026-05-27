@@ -26,7 +26,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| _None_ | no | â€” | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
+| _None_ | no | — | This plugin has no dedicated `SEMREL_PLUGIN_*` variables. |
 
 ## Release Context Variables
 

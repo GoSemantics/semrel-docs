@@ -32,8 +32,8 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_BASE_URL` | yes | `â€”` | Base URL for the Gitea instance. |
-| `SEMREL_PLUGIN_TOKEN` | yes | `â€”` | API token for Gitea authentication. |
+| `SEMREL_PLUGIN_BASE_URL` | yes | `—` | Base URL for the Gitea instance. |
+| `SEMREL_PLUGIN_TOKEN` | yes | `—` | API token for Gitea authentication. |
 | `SEMREL_PLUGIN_OWNER` | no | `current repository owner` | Repository owner or organization. |
 | `SEMREL_PLUGIN_REPO` | no | `current repository name` | Repository name to publish into. |
 | `SEMREL_PLUGIN_DRAFT` | no | `false` | Create the release as a draft. |

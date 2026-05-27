@@ -31,7 +31,7 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_WEBHOOK_URL` | yes | `â€”` | Slack incoming webhook URL. |
+| `SEMREL_PLUGIN_WEBHOOK_URL` | yes | `—` | Slack incoming webhook URL. |
 | `SEMREL_PLUGIN_CHANNEL` | no | `workspace default` | Override the destination channel for the webhook. |
 | `SEMREL_PLUGIN_USERNAME` | no | `semrel` | Display name for the Slack message. |
 | `SEMREL_PLUGIN_ICON_EMOJI` | no | `:rocket:` | Emoji icon for the Slack message. |

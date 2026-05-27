@@ -34,12 +34,12 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_SMTP_HOST` | yes | `â€”` | SMTP server hostname. |
+| `SEMREL_PLUGIN_SMTP_HOST` | yes | `—` | SMTP server hostname. |
 | `SEMREL_PLUGIN_SMTP_PORT` | no | `587` | SMTP server port. |
-| `SEMREL_PLUGIN_SMTP_USER` | yes | `â€”` | SMTP username. |
-| `SEMREL_PLUGIN_SMTP_PASS` | yes | `â€”` | SMTP password or app password. |
-| `SEMREL_PLUGIN_FROM` | yes | `â€”` | Sender email address. |
-| `SEMREL_PLUGIN_TO` | yes | `â€”` | Comma-separated list of recipient email addresses. |
+| `SEMREL_PLUGIN_SMTP_USER` | yes | `—` | SMTP username. |
+| `SEMREL_PLUGIN_SMTP_PASS` | yes | `—` | SMTP password or app password. |
+| `SEMREL_PLUGIN_FROM` | yes | `—` | Sender email address. |
+| `SEMREL_PLUGIN_TO` | yes | `—` | Comma-separated list of recipient email addresses. |
 | `SEMREL_PLUGIN_SUBJECT_TEMPLATE` | no | `plugin-defined` | Optional subject template for the release email. |
 | `SEMREL_PLUGIN_TLS` | no | `true` | Enable or disable TLS for the SMTP connection. |
 

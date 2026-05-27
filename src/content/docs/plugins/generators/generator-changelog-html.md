@@ -31,7 +31,7 @@ plugins:
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
 | `SEMREL_PLUGIN_TEMPLATE` | no | `built-in template` | Path to a Go template used to render the changelog. |
-| `SEMREL_PLUGIN_CSS_FILE` | no | `â€”` | Optional CSS file to embed or reference in the HTML output. |
+| `SEMREL_PLUGIN_CSS_FILE` | no | `—` | Optional CSS file to embed or reference in the HTML output. |
 | `SEMREL_PLUGIN_MAX_COMMITS` | no | `100` | Maximum number of commits to include. |
 
 ## Release Context Variables

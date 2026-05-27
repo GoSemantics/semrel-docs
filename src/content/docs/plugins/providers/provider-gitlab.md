@@ -31,10 +31,10 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_TOKEN` | yes | `â€”` | GitLab token used to create the release. |
+| `SEMREL_PLUGIN_TOKEN` | yes | `—` | GitLab token used to create the release. |
 | `SEMREL_PLUGIN_BASE_URL` | no | `https://gitlab.com` | Base URL for the GitLab instance. |
 | `SEMREL_PLUGIN_PROJECT_ID` | no | `current project` | Numeric or URL-encoded project identifier. |
-| `SEMREL_PLUGIN_MILESTONE` | no | `â€”` | Optional milestone to associate with the release. |
+| `SEMREL_PLUGIN_MILESTONE` | no | `—` | Optional milestone to associate with the release. |
 
 ## Release Context Variables
 

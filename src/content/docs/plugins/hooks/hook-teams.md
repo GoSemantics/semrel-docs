@@ -29,15 +29,15 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_WEBHOOK_URL` | yes | `â€”` | Microsoft Teams Incoming Webhook URL. |
+| `SEMREL_PLUGIN_WEBHOOK_URL` | yes | `—` | Microsoft Teams Incoming Webhook URL. |
 | `SEMREL_PLUGIN_TITLE` | no | `ðŸš€ New Release` | Card title shown in the Teams message. |
 | `SEMREL_PLUGIN_THEME_COLOR` | no | `0078D7` | Hex colour (without `#`) for the card accent. |
-| `SEMREL_PLUGIN_MENTION` | no | `â€”` | Email address of a Teams user to @mention. |
+| `SEMREL_PLUGIN_MENTION` | no | `—` | Email address of a Teams user to @mention. |
 
 ## Getting a Webhook URL
 
-1. In Teams, open the target channel â†’ **Â·Â·Â·** â†’ **Connectors**
-2. Search for **Incoming Webhook** â†’ **Configure**
+1. In Teams, open the target channel → **···** → **Connectors**
+2. Search for **Incoming Webhook** → **Configure**
 3. Give it a name (e.g. `semrel`) and optionally upload an icon
 4. Copy the generated webhook URL and store it as a secret
 

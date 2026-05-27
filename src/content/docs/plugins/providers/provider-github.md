@@ -33,12 +33,12 @@ plugins:
 
 | Name | Required | Default | Description |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_TOKEN` | yes | `â€”` | GitHub token used to create the release. |
+| `SEMREL_PLUGIN_TOKEN` | yes | `—` | GitHub token used to create the release. |
 | `SEMREL_PLUGIN_OWNER` | no | `current repository owner` | Repository owner or organization. |
 | `SEMREL_PLUGIN_REPO` | no | `current repository name` | Repository name to publish into. |
 | `SEMREL_PLUGIN_DRAFT` | no | `false` | Create the release as a draft. |
 | `SEMREL_PLUGIN_PRERELEASE` | no | `false` | Mark the release as a prerelease. |
-| `SEMREL_PLUGIN_ASSET_GLOB` | no | `â€”` | Glob pattern for release assets to upload. |
+| `SEMREL_PLUGIN_ASSET_GLOB` | no | `—` | Glob pattern for release assets to upload. |
 
 ## Release Context Variables
 
