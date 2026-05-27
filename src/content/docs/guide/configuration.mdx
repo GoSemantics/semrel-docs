@@ -42,6 +42,9 @@ rules:
   - type: revert
     bump: patch
 
+commit_changelog: true
+tag_exists_strategy: update-changelog
+
 version_ceiling: "1.0.0"
 ceiling_strategy: clamp
 
@@ -141,7 +144,40 @@ When `rules:` is absent, semrel uses:
 
 Commit types not listed in `rules` produce no release.
 
-## `version_ceiling`
+## `commit_changelog`
+
+Controls whether semrel commits `CHANGELOG.md` back to the repository before creating the release tag.
+
+```yaml
+commit_changelog: true   # default
+```
+
+| Value | Behaviour |
+| --- | --- |
+| `true` (default) | semrel writes CHANGELOG.md, commits it as `chore(changelog): update for vX.Y.Z [skip ci]`, then creates the tag on that commit |
+| `false` | semrel writes CHANGELOG.md locally but does not commit it (useful if you manage the changelog externally) |
+
+<Aside type="tip">
+  The `[skip ci]` suffix in the changelog commit message prevents most CI systems from triggering a new pipeline run for the changelog commit itself.
+</Aside>
+
+## `tag_exists_strategy`
+
+Controls what semrel does when the computed next version tag already exists locally (e.g. after a manual tag push or a re-run).
+
+```yaml
+tag_exists_strategy: update-changelog   # default
+```
+
+| Strategy | Behaviour |
+| --- | --- |
+| `update-changelog` (default) | Updates and commits `CHANGELOG.md` for the existing version, then exits without error. Idempotent — useful for repair runs. |
+| `skip` | Exits silently without any changes. |
+| `error` | Exits with a non-zero code. Use this if you want strict one-shot pipelines. |
+
+**Example scenario:** you manually created `v0.1.0` to bootstrap the project. The next pipeline run detects the tag exists and, with the default strategy, regenerates and commits the changelog for that version — no duplicate release is created.
+
+
 
 Prevents semrel from releasing at or above this version. Useful for keeping a project below `1.0.0` until you deliberately promote it to stable.
 
