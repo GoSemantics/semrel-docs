@@ -31,6 +31,42 @@ plugins:
 
 The config schema version. Always set this to `1`.
 
+## `version_ceiling`
+
+Prevents semrel from releasing at or above this version. Useful for keeping a project below `1.0.0` until you deliberately promote it to stable.
+
+```yaml
+version_ceiling: "1.0.0"
+```
+
+| Value | Effect |
+| --- | --- |
+| Not set | No ceiling — semrel bumps freely |
+| `"1.0.0"` | Releases are never `>= 1.0.0` |
+
+### `ceiling_strategy`
+
+Controls what happens when the calculated next version would reach or exceed `version_ceiling`.
+
+```yaml
+version_ceiling: "1.0.0"
+ceiling_strategy: clamp   # clamp (default) | skip | error
+```
+
+| Strategy | Behaviour |
+| --- | --- |
+| `clamp` | Downgrades the bump (major → minor → patch) until the version stays below the ceiling. Logs a warning. |
+| `skip` | Does nothing — prints a notice and exits without releasing. |
+| `error` | Exits with a non-zero code so the pipeline fails explicitly. |
+
+**Example:** current `0.9.5`, breaking change commit, ceiling `1.0.0`
+
+- `clamp` → releases `0.9.6` (downgraded to patch)
+- `skip` → no release, exit 0
+- `error` → no release, exit 1
+
+To promote past the ceiling, remove or raise `version_ceiling` in `.semrel.yaml` and commit.
+
 ## `branches`
 
 A list of branches from which releases can be made.

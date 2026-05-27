@@ -31,7 +31,9 @@ export default defineConfig({
         },
         {
           label: 'Guide',
-          items: [{ autogenerate: { directory: 'guide' } }],
+          items: [
+            { autogenerate: { directory: 'guide' } },
+          ],
         },
         {
           label: 'Plugins',

@@ -30,6 +30,9 @@ semrel release [--dry-run] [--config .semrel.yaml] [--force-bump-patch-version] 
 | `--config` | Read configuration from a non-default file |
 | `--force-bump-patch-version` | Force at least a patch bump even when the analyzer would not bump the version |
 | `--edit` | Let you edit generated release content before the release is finalized |
+| `--github-output` | Write release metadata to `$GITHUB_OUTPUT` for use in downstream GitHub Actions steps |
+| `--gitlab-dotenv <file>` | Write release metadata as a dotenv artifact file for GitLab CI downstream jobs |
+| `--output-file <file>` | Write release metadata to a file (`.json` for JSON, any other extension for dotenv format) |
 
 ### Examples
 
@@ -42,6 +45,15 @@ semrel release --config .github/semrel.yaml
 
 # Force a patch bump
 semrel release --force-bump-patch-version
+
+# Export outputs for GitHub Actions downstream steps
+semrel release --github-output
+
+# Export dotenv artifact for GitLab CI
+semrel release --gitlab-dotenv semrel.env
+
+# Export as JSON file
+semrel release --output-file release.json
 ```
 
 ## `semrel lint`
