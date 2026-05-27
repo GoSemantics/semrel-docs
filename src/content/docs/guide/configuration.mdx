@@ -3,7 +3,7 @@ title: Configuration
 description: All .semrel.yaml configuration options explained.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 All semrel behavior is controlled by a single config file in the root of your repository. You can specify a different path with `--config`.
 
@@ -17,63 +17,196 @@ semrel auto-discovers the config file in this order:
 | `.semrel.toml` | TOML |
 | `.semrel.json` | JSON |
 
-The examples on this page use YAML. TOML and JSON use `snake_case` keys (e.g. `tag_prefix` instead of `tagPrefix`).
+YAML uses `camelCase` for some keys (e.g. `tagPrefix`). TOML and JSON always use `snake_case` (e.g. `tag_prefix`).
 
 ## Full example
 
-```yaml
-version: 1
-tagPrefix: v
+<Tabs>
+  <TabItem label="YAML (.semrel.yaml)">
+    ```yaml
+    tagPrefix: v
 
-branches:
-  - name: main
-  - name: "*.x"
-    maintenance: true
-  - name: next
-    prerelease: beta
+    branches:
+      - name: main
+      - name: "*.x"
+        maintenance: true
+      - name: next
+        prerelease: beta
 
-rules:
-  - type: feat
-    bump: minor
-  - type: fix
-    bump: patch
-  - type: perf
-    bump: patch
-  - type: revert
-    bump: patch
+    rules:
+      - type: feat
+        bump: minor
+      - type: fix
+        bump: patch
+      - type: perf
+        bump: patch
+      - type: revert
+        bump: patch
 
-commit_changelog: true
-tag_exists_strategy: update-changelog
+    commit_changelog: true
+    tag_exists_strategy: update-changelog
 
-version_ceiling: "1.0.0"
-ceiling_strategy: clamp
+    version_ceiling: "1.0.0"
+    ceiling_strategy: clamp
 
-plugins:
-  - uses: github
-    name: github-release
-    args:
-      token: ${{ env.GITHUB_TOKEN }}
-      owner: MyOrg
-      repo: my-repo
+    plugins:
+      - uses: github-actions
+        phase: condition
 
-  - uses: slack-notify
-    path: /usr/local/bin/semrel-plugin-slack
-    args:
-      webhook_url: ${{ env.SLACK_WEBHOOK }}
-```
+      - uses: github
+        phase: release
+        args:
+          token: ${{ env.GITHUB_TOKEN }}
+          owner: MyOrg
+          repo: my-repo
 
-## `version`
+      - uses: gobinary
+        phase: pre-tag
+        args:
+          file: internal/version/version.go
+          var_name: Version
 
-The config schema version. Always set this to `1`.
+      - uses: slack
+        args:
+          webhook_url: ${{ env.SLACK_WEBHOOK }}
+    ```
+  </TabItem>
+  <TabItem label="TOML (.semrel.toml)">
+    ```toml
+    tag_prefix = "v"
+    commit_changelog = true
+    tag_exists_strategy = "update-changelog"
+    version_ceiling = "1.0.0"
+    ceiling_strategy = "clamp"
 
-## `tagPrefix`
+    [[branches]]
+    name = "main"
+
+    [[branches]]
+    name = "*.x"
+    maintenance = true
+
+    [[branches]]
+    name = "next"
+    prerelease = "beta"
+
+    [[rules]]
+    type = "feat"
+    bump = "minor"
+
+    [[rules]]
+    type = "fix"
+    bump = "patch"
+
+    [[rules]]
+    type = "perf"
+    bump = "patch"
+
+    [[rules]]
+    type = "revert"
+    bump = "patch"
+
+    [[plugins]]
+    uses = "github-actions"
+    phase = "condition"
+
+    [[plugins]]
+    uses = "github"
+    phase = "release"
+    [plugins.args]
+    token = "${GITHUB_TOKEN}"
+    owner = "MyOrg"
+    repo = "my-repo"
+
+    [[plugins]]
+    uses = "gobinary"
+    phase = "pre-tag"
+    [plugins.args]
+    file = "internal/version/version.go"
+    var_name = "Version"
+
+    [[plugins]]
+    uses = "slack"
+    [plugins.args]
+    webhook_url = "${SLACK_WEBHOOK}"
+    ```
+  </TabItem>
+  <TabItem label="JSON (.semrel.json)">
+    ```json
+    {
+      "tag_prefix": "v",
+      "commit_changelog": true,
+      "tag_exists_strategy": "update-changelog",
+      "version_ceiling": "1.0.0",
+      "ceiling_strategy": "clamp",
+      "branches": [
+        { "name": "main" },
+        { "name": "*.x", "maintenance": true },
+        { "name": "next", "prerelease": "beta" }
+      ],
+      "rules": [
+        { "type": "feat", "bump": "minor" },
+        { "type": "fix",  "bump": "patch" },
+        { "type": "perf", "bump": "patch" },
+        { "type": "revert", "bump": "patch" }
+      ],
+      "plugins": [
+        {
+          "uses": "github-actions",
+          "phase": "condition"
+        },
+        {
+          "uses": "github",
+          "phase": "release",
+          "args": {
+            "token": "${GITHUB_TOKEN}",
+            "owner": "MyOrg",
+            "repo": "my-repo"
+          }
+        },
+        {
+          "uses": "gobinary",
+          "phase": "pre-tag",
+          "args": {
+            "file": "internal/version/version.go",
+            "var_name": "Version"
+          }
+        },
+        {
+          "uses": "slack",
+          "args": {
+            "webhook_url": "${SLACK_WEBHOOK}"
+          }
+        }
+      ]
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## `tagPrefix` / `tag_prefix`
 
 The prefix prepended to the version number when creating git tags.
 
-```yaml
-tagPrefix: v   # creates tags like v1.2.3 (default)
-tagPrefix: ""  # creates tags like 1.2.3
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    tagPrefix: v   # creates tags like v1.2.3 (default)
+    tagPrefix: ""  # creates tags like 1.2.3
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    tag_prefix = "v"   # creates tags like v1.2.3 (default)
+    tag_prefix = ""    # creates tags like 1.2.3
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    { "tag_prefix": "v" }
+    ```
+  </TabItem>
+</Tabs>
 
 | Value | Default | Description |
 | --- | --- | --- |
@@ -83,14 +216,43 @@ tagPrefix: ""  # creates tags like 1.2.3
 
 A list of branches from which releases can be made. Commits on unlisted branches are ignored.
 
-```yaml
-branches:
-  - name: main
-  - name: "*.x"
-    maintenance: true
-  - name: next
-    prerelease: beta
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    branches:
+      - name: main
+      - name: "*.x"
+        maintenance: true
+      - name: next
+        prerelease: beta
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    [[branches]]
+    name = "main"
+
+    [[branches]]
+    name = "*.x"
+    maintenance = true
+
+    [[branches]]
+    name = "next"
+    prerelease = "beta"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    {
+      "branches": [
+        { "name": "main" },
+        { "name": "*.x", "maintenance": true },
+        { "name": "next", "prerelease": "beta" }
+      ]
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 ### Branch fields
 
@@ -108,17 +270,52 @@ branches:
 
 Maps conventional commit types to semver bump levels. If omitted, semrel uses the built-in defaults.
 
-```yaml
-rules:
-  - type: feat
-    bump: minor
-  - type: fix
-    bump: patch
-  - type: perf
-    bump: patch
-  - type: revert
-    bump: patch
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    rules:
+      - type: feat
+        bump: minor
+      - type: fix
+        bump: patch
+      - type: perf
+        bump: patch
+      - type: revert
+        bump: patch
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    [[rules]]
+    type = "feat"
+    bump = "minor"
+
+    [[rules]]
+    type = "fix"
+    bump = "patch"
+
+    [[rules]]
+    type = "perf"
+    bump = "patch"
+
+    [[rules]]
+    type = "revert"
+    bump = "patch"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    {
+      "rules": [
+        { "type": "feat",   "bump": "minor" },
+        { "type": "fix",    "bump": "patch" },
+        { "type": "perf",   "bump": "patch" },
+        { "type": "revert", "bump": "patch" }
+      ]
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 ### Rule fields
 
@@ -148,9 +345,23 @@ Commit types not listed in `rules` produce no release.
 
 Controls whether semrel commits `CHANGELOG.md` back to the repository before creating the release tag.
 
-```yaml
-commit_changelog: true   # default
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    commit_changelog: true   # default
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    commit_changelog = true
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    { "commit_changelog": true }
+    ```
+  </TabItem>
+</Tabs>
 
 | Value | Behaviour |
 | --- | --- |
@@ -163,11 +374,25 @@ commit_changelog: true   # default
 
 ## `tag_exists_strategy`
 
-Controls what semrel does when the computed next version tag already exists locally (e.g. after a manual tag push or a re-run).
+Controls what semrel does when the computed next version tag already exists locally.
 
-```yaml
-tag_exists_strategy: update-changelog   # default
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    tag_exists_strategy: update-changelog   # default
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    tag_exists_strategy = "update-changelog"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    { "tag_exists_strategy": "update-changelog" }
+    ```
+  </TabItem>
+</Tabs>
 
 | Strategy | Behaviour |
 | --- | --- |
@@ -177,13 +402,32 @@ tag_exists_strategy: update-changelog   # default
 
 **Example scenario:** you manually created `v0.1.0` to bootstrap the project. The next pipeline run detects the tag exists and, with the default strategy, regenerates and commits the changelog for that version — no duplicate release is created.
 
-
+## `version_ceiling`
 
 Prevents semrel from releasing at or above this version. Useful for keeping a project below `1.0.0` until you deliberately promote it to stable.
 
-```yaml
-version_ceiling: "1.0.0"
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    version_ceiling: "1.0.0"
+    ceiling_strategy: clamp
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    version_ceiling = "1.0.0"
+    ceiling_strategy = "clamp"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    {
+      "version_ceiling": "1.0.0",
+      "ceiling_strategy": "clamp"
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 | Value | Effect |
 | --- | --- |
@@ -193,11 +437,6 @@ version_ceiling: "1.0.0"
 ### `ceiling_strategy`
 
 Controls what happens when the calculated next version would reach or exceed `version_ceiling`.
-
-```yaml
-version_ceiling: "1.0.0"
-ceiling_strategy: clamp   # clamp (default) | skip | error
-```
 
 | Strategy | Behaviour |
 | --- | --- |
@@ -211,7 +450,7 @@ ceiling_strategy: clamp   # clamp (default) | skip | error
 - `skip` → no release, exit 0
 - `error` → no release, exit 1
 
-To promote past the ceiling, remove or raise `version_ceiling` in `.semrel.yaml` and commit.
+To promote past the ceiling, remove or raise `version_ceiling` in your config file and commit.
 
 ## `plugins`
 
@@ -223,31 +462,110 @@ An ordered list of plugins to load for the release pipeline.
 | `name` | string | no | Optional instance identifier (useful when the same plugin appears multiple times) |
 | `path` | string | no | Explicit path to a plugin binary (overrides `uses` resolution) |
 | `args` | map | no | Arbitrary key-value pairs passed to the plugin as `SEMREL_PLUGIN_*` environment variables |
-| `phase` | string | no | When to run: `condition` (before any git work) or `release` (after tag created, default) |
+| `phase` | string | no | When to run: `condition`, `pre-tag`, or `release` (default) |
 
 *Either `uses` or `path` must be set.
 
 ### Plugin phases
 
-The `phase` field controls *when* in the release pipeline the plugin runs:
-
 | Phase | When it runs | Typical use |
 | --- | --- | --- |
-| `condition` | After config load, **before** any commit analysis or tag creation | `condition-github-actions`, `condition-gitlab-ci` — abort if environment is wrong |
-| `release` | After the tag is created (default) | `provider-github`, `hook-slack`, `updater-npm` — publish and notify |
+| `condition` | After config load, **before** any commit analysis or tag creation | `github-actions`, `gitlab-ci` — abort if environment is wrong |
+| `pre-tag` | After version calculation and changelog write, **before** the git tag is created | `gobinary` — update version file and commit so the tagged source contains the real version |
+| `release` | After the tag is created (default) | `github`, `hook-slack`, `updater-npm` — publish and notify |
 
-```yaml
-plugins:
-  # Gate: abort if not running in GitHub Actions
-  - uses: condition-github-actions
-    phase: condition
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    plugins:
+      # Gate: abort if not running in GitHub Actions
+      - uses: github-actions
+        phase: condition
 
-  # Post-release: create GitHub release with changelog body
-  - uses: provider-github
-    phase: release   # this is the default, can be omitted
-    args:
-      token: ${{ env.GITHUB_TOKEN }}
-```
+      # Pre-tag: update Go version variable before tagging
+      - uses: gobinary
+        phase: pre-tag
+        args:
+          file: internal/version/version.go
+          var_name: Version
+
+      # Release: create GitHub release with changelog
+      - uses: github
+        phase: release   # default, can be omitted
+        args:
+          token: ${{ env.GITHUB_TOKEN }}
+          owner: MyOrg
+          repo: my-repo
+
+      # Hook: notify Slack after release
+      - uses: slack
+        args:
+          webhook_url: ${{ env.SLACK_WEBHOOK }}
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    [[plugins]]
+    uses = "github-actions"
+    phase = "condition"
+
+    [[plugins]]
+    uses = "gobinary"
+    phase = "pre-tag"
+    [plugins.args]
+    file = "internal/version/version.go"
+    var_name = "Version"
+
+    [[plugins]]
+    uses = "github"
+    phase = "release"
+    [plugins.args]
+    token = "${GITHUB_TOKEN}"
+    owner = "MyOrg"
+    repo = "my-repo"
+
+    [[plugins]]
+    uses = "slack"
+    [plugins.args]
+    webhook_url = "${SLACK_WEBHOOK}"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    {
+      "plugins": [
+        {
+          "uses": "github-actions",
+          "phase": "condition"
+        },
+        {
+          "uses": "gobinary",
+          "phase": "pre-tag",
+          "args": {
+            "file": "internal/version/version.go",
+            "var_name": "Version"
+          }
+        },
+        {
+          "uses": "github",
+          "phase": "release",
+          "args": {
+            "token": "${GITHUB_TOKEN}",
+            "owner": "MyOrg",
+            "repo": "my-repo"
+          }
+        },
+        {
+          "uses": "slack",
+          "args": {
+            "webhook_url": "${SLACK_WEBHOOK}"
+          }
+        }
+      ]
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 ### Plugin resolution
 
@@ -266,14 +584,42 @@ Use `path:` when you want to pin a specific local binary instead of the default 
 
 Every key in `args:` is exposed to the plugin process as an environment variable prefixed with `SEMREL_PLUGIN_`.
 
-```yaml
-plugins:
-  - uses: github
-    args:
-      token: ${{ env.GITHUB_TOKEN }}
-      owner: MyOrg
-      repo: my-repo
-```
+<Tabs>
+  <TabItem label="YAML">
+    ```yaml
+    plugins:
+      - uses: github
+        args:
+          token: ${{ env.GITHUB_TOKEN }}
+          owner: MyOrg
+          repo: my-repo
+    ```
+  </TabItem>
+  <TabItem label="TOML">
+    ```toml
+    [[plugins]]
+    uses = "github"
+    [plugins.args]
+    token = "${GITHUB_TOKEN}"
+    owner = "MyOrg"
+    repo = "my-repo"
+    ```
+  </TabItem>
+  <TabItem label="JSON">
+    ```json
+    {
+      "plugins": [{
+        "uses": "github",
+        "args": {
+          "token": "${GITHUB_TOKEN}",
+          "owner": "MyOrg",
+          "repo": "my-repo"
+        }
+      }]
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 The plugin receives:
 
@@ -283,6 +629,14 @@ The plugin receives:
 | `owner` | `SEMREL_PLUGIN_OWNER` |
 | `repo` | `SEMREL_PLUGIN_REPO` |
 
-Plugins also receive release context through environment variables such as `SEMREL_CURRENT_VERSION`, `SEMREL_NEXT_VERSION`, `SEMREL_TAG_NAME`, `SEMREL_CHANGELOG`, and `SEMREL_DRY_RUN`.
+Plugins also receive release context through standard environment variables:
+
+| Variable | Description |
+| --- | --- |
+| `SEMREL_CURRENT_VERSION` | The version before this release |
+| `SEMREL_NEXT_VERSION` | The new version being released |
+| `SEMREL_TAG_NAME` | The full tag name including prefix (e.g. `v1.2.3`) |
+| `SEMREL_CHANGELOG` | Path to the written `CHANGELOG.md` file |
+| `SEMREL_DRY_RUN` | `true` if semrel was invoked with `--dry-run` |
 
 semrel plugins are plain executables launched as subprocesses. They do not use gRPC.
