@@ -23,6 +23,7 @@ export default defineConfig({
       favicon: '/semrel.png',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/GoSemantics/semrel' },
+        { icon: 'external', label: 'Registry', href: 'https://registry.semrel.io' },
       ],
       sidebar: [
         {
@@ -102,6 +103,7 @@ export default defineConfig({
               ],
             },
             { label: 'Registry', link: '/plugins/registry/' },
+            { label: 'Registry UI ↗', link: 'https://registry.semrel.io', attrs: { target: '_blank', rel: 'noopener' } },
             { label: 'Publishing', link: '/plugins/publishing/' },
             { label: 'Development', link: '/plugins/sdk/' },
             { label: 'Examples', link: '/plugins/examples/' },

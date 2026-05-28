@@ -107,6 +107,10 @@ The values go into the registry metadata under platform keys such as `linux_amd6
 
 5. **Prepare registry metadata**
 
+   **Option A — Community submission (recommended for external plugins):**
+   Submit via the registry web UI at [registry.semrel.io/submit](https://registry.semrel.io/submit). Your plugin will be queued for maintainer review.
+
+   **Option B — Pull request against the registry:**
    Open a pull request against [`SemRels/semrel-registry`](https://github.com/SemRels/semrel-registry) with the metadata for the new plugin or version.
 
    ```json
@@ -140,6 +144,9 @@ The values go into the registry metadata under platform keys such as `linux_amd6
 
 ## Release guide and references
 
+- [Plugin Registry](https://registry.semrel.io) — browse all published plugins
+- [Submit a plugin](https://registry.semrel.io/submit) — community submission form
+- [Registry API](https://registry.semrel.io/api/v1/plugins) — machine-readable JSON
 - [go-semrel-registry release guide](https://github.com/SemRels/semrel-registry/blob/main/docs/release-guide.md)
 - [Plugin submission overview](https://github.com/SemRels/semrel-registry/blob/main/docs/contribute.md)
 - [Plugin Registry overview](/plugins/registry/)

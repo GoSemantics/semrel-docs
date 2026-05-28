@@ -3,18 +3,25 @@ title: Plugin Registry
 description: Discover SemRels plugins, understand the registry metadata, and learn how the registry fits into plugin delivery.
 ---
 
-import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+import { Card, CardGrid, Aside, LinkButton } from '@astrojs/starlight/components';
 
 The **SemRels Plugin Registry** is the public catalog for semrel plugins. It brings together plugin metadata, released versions, download URLs, and checksums so semrel can discover and install plugins consistently.
 
-Today, the machine-readable registry is served from GitHub Pages via the `semrel-registry` repository:
+<CardGrid>
+  <Card title="Browse Plugins" icon="magnifier">
+    Explore all available plugins, filter by category, and read version history at **[registry.semrel.io](https://registry.semrel.io)**.
+  </Card>
+  <Card title="Submit a Plugin" icon="add-document">
+    Community plugins can be submitted for review at **[registry.semrel.io/submit](https://registry.semrel.io/submit)**.
+  </Card>
+</CardGrid>
 
-- Registry index: [https://semrels.github.io/semrel-registry/plugins.json](https://semrels.github.io/semrel-registry/plugins.json)
-- Source repository: [SemRels/semrel-registry](https://github.com/SemRels/semrel-registry)
+The machine-readable registry index is served at:
 
-<Aside type="note">
-  The `registry.semrel.io` custom domain is being set up. Until that is ready, the GitHub Pages URL above is the source of truth.
-</Aside>
+- **Web UI:** [https://registry.semrel.io](https://registry.semrel.io)
+- **REST API:** [https://registry.semrel.io/api/v1/plugins](https://registry.semrel.io/api/v1/plugins)
+- **Raw index:** [https://semrels.github.io/semrel-registry/plugins.json](https://semrels.github.io/semrel-registry/plugins.json)
+- **Source:** [SemRels/semrel-registry](https://github.com/SemRels/semrel-registry)
 
 ## What the registry does
 
@@ -93,6 +100,8 @@ The registry payload starts with a small root document and then lists plugins wi
 ## Publishing a plugin
 
 If you maintain a plugin, continue with the [Plugin Publishing Guide](/plugins/publishing/) for the release flow, naming recommendations, and checksum steps.
+
+Community authors can also submit plugins directly through the [registry submission form](https://registry.semrel.io/submit) — a maintainer will review and approve submissions against our standards.
 
 ## Related docs
 
